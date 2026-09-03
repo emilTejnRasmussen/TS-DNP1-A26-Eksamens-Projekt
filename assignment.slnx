@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Server/">
     <Project Path="Entities/Entities.csproj" />
+    <Project Path="RepositoryContract/RepositoryContract.csproj" />
   </Folder>
 </Solution>
