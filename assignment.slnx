@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Server/">
     <Project Path="Entities/Entities.csproj" />
+    <Project Path="InMemoryRepositories/InMemoryRepositories.csproj" />
     <Project Path="RepositoryContract/RepositoryContract.csproj" />
   </Folder>
 </Solution>

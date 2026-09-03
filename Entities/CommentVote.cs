@@ -1,6 +1,6 @@
 ﻿namespace Entities;
 
-public class CommentVote(int id, int userId, int commentId, VoteType voteType)
+public class CommentVote(int id, int userId, int commentId, VoteType voteType) : IEntity
 {
     public int Id { get; set; } = id;
     public int UserId { get; set; } = userId;

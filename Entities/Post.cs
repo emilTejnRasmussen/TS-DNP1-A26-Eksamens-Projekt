@@ -1,6 +1,6 @@
 ﻿namespace Entities;
 
-public class Post(int id, string title, string body, int userId, int subforumId)
+public class Post(int id, string title, string body, int userId, int subforumId) : IEntity
 {
     public int Id { get; set; } = id;
     public string Title { get; set; } = title;

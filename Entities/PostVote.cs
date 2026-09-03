@@ -1,6 +1,6 @@
 ﻿namespace Entities;
 
-public class PostVote(int id, int userId, int postId, VoteType voteType)
+public class PostVote(int id, int userId, int postId, VoteType voteType) : IEntity
 {
     public int Id { get; set; } = id;
     public int UserId { get; set; } = userId;

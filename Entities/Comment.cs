@@ -1,6 +1,6 @@
 ﻿namespace Entities;
 
-public class Comment(int id, string body, int userId, int postId, int? parentCommentId)
+public class Comment(int id, string body, int userId, int postId, int? parentCommentId) : IEntity
 {
     public int Id { get; set; } = id;
     public string Body { get; set; } = body;
