@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Folder Name="/Server/">
+    <Project Path="Entities/Entities.csproj" />
+  </Folder>
+</Solution>
