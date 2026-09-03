@@ -10,7 +10,7 @@ public class GenericInMemoryRepository<T> : IRepository<T> where T : IEntity
     public Task<T> AddAsync(T entity)
     {
         entity.Id = _entities.Count != 0
-            ? _entities.Max(e => e.Id + 1)
+            ? _entities.Max(e => e.Id) + 1
             : 1;
         
         _entities.Add(entity);
