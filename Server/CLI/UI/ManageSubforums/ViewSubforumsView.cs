@@ -5,10 +5,13 @@ using RepositoryContract;
 
 namespace CLI.UI.ManageSubforums;
 
-public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepository postRepository)
+public class ViewSubforumsView(
+    ISubforumRepository subforumRepository, 
+    IPostRepository postRepository, 
+    ICommentRepository commentRepository)
 {
     private readonly CreatePostView _createPostView = new(postRepository);
-    private Subforum? _currentSubforum;
+    private readonly ViewPostsView _viewPostsView = new(postRepository, commentRepository);
 
     public async Task ShowAsync(int userId)
     {
@@ -16,11 +19,12 @@ public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepo
         {
             ConsoleHelper.PrintHeader("Subforums");
 
-            _currentSubforum = SelectSubforum();
+            var subforums = subforumRepository.GetMany().ToList();
+            var subforum = ConsoleHelper.SelectFromList(subforums, s => s.Name);
 
-            if (_currentSubforum is null) return;
+            if (subforum is null) return;
 
-            await DisplaySubforumAsync(_currentSubforum, userId);
+            await DisplaySubforumAsync(subforum, userId);
         }
  
     }
@@ -41,7 +45,7 @@ public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepo
             switch (option)
             {
                 case 1:
-                    Console.WriteLine("Not implemented");
+                    await _viewPostsView.ShowAsync(userId, subforum);
                     break;
 
                 case 2:
@@ -52,25 +56,5 @@ public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepo
                     return;
             }
         }
-    }
-
-    private Subforum? SelectSubforum()
-    {
-        var subforums = subforumRepository.GetMany().ToList();
-
-        for (var i = 0; i < subforums.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {subforums[i].Name}");
-        }
-
-        Console.WriteLine("0. Go back");
-
-        var option = ConsoleHelper.ReadInt(
-            "Select subforum: ",
-            0,
-            subforums.Count
-        );
-
-        return option == 0 ? null : subforums[option - 1];
     }
 }

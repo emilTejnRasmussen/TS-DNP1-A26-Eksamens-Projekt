@@ -16,7 +16,7 @@ public class CliApp(
 {
     private readonly CreateUserView _createUserView = new(userRepository);
     private readonly CreateSubforumView _createSubforumView = new(subforumRepository);
-    private readonly ViewSubforumsView _viewSubforumsView = new(subforumRepository, postRepository);
+    private readonly ViewSubforumsView _viewSubforumsView = new(subforumRepository, postRepository, commentRepository);
 
     private User? _currentUser;
 

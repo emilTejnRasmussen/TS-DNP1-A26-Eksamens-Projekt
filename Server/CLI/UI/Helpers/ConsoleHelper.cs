@@ -1,4 +1,6 @@
-﻿namespace CLI.UI.Helpers;
+﻿using System.Globalization;
+
+namespace CLI.UI.Helpers;
 
 public class ConsoleHelper
 {
@@ -28,7 +30,7 @@ public class ConsoleHelper
             Console.WriteLine("Please enter a valid number.");
         }
     }
-    
+
     public static int ReadInt(string prompt, int min, int max)
     {
         while (true)
@@ -42,5 +44,24 @@ public class ConsoleHelper
 
             Console.WriteLine($"Please enter a number between {min} and {max}.");
         }
+    }
+
+    public static void PrintDivider()
+    {
+        Console.WriteLine("-----------------");
+    }
+
+    public static T? SelectFromList<T>(List<T> items, Func<T, string> display)
+    {
+        for (var i = 0; i < items.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {display(items[i])}");
+        }
+
+        Console.WriteLine("0. Go back");
+
+        var option = ReadInt("Select option: ", 0, items.Count);
+
+        return option == 0 ? default : items[option - 1];
     }
 }
