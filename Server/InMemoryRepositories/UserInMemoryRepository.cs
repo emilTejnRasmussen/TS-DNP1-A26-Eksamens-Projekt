@@ -5,9 +5,15 @@ namespace InMemoryRepositories;
 
 public class UserInMemoryRepository : GenericInMemoryRepository<User>, IUserRepository
 {
-    private void SeedData()
+    public UserInMemoryRepository()
     {
-        AddAsync(new User("username1", "qwerty"));
-        AddAsync(new User("username2", "qwerty"));
+        SeedDataAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task SeedDataAsync()
+    {
+        await AddAsync(new User("joe", "1234"));
+        await AddAsync(new User("alice", "1234"));
+        await AddAsync(new User("bob", "1234"));
     }
 }

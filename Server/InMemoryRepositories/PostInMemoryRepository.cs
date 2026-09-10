@@ -5,12 +5,41 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : GenericInMemoryRepository<Post>, IPostRepository
 {
-    // I can do like this to add extra functionality to only this implementation
-    // e.g. add methods in repo: IPostRepository
-    
-    private void SeedData()
+    public PostInMemoryRepository()
     {
-        AddAsync(new Post("This is my post", "This is my opinion", 1, 1));
-        AddAsync(new Post("This is also my post", "This is also my opinion", 1, 1));
+        SeedDataAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task SeedDataAsync()
+    {
+        await AddAsync(new Post(
+            "Welcome to the forum",
+            "Feel free to introduce yourself!",
+            1,
+            1));
+
+        await AddAsync(new Post(
+            "What are you working on?",
+            "Share what you are currently building.",
+            2,
+            1));
+
+        await AddAsync(new Post(
+            "C# async and await",
+            "I am trying to understand asynchronous programming in C#.",
+            1,
+            2));
+
+        await AddAsync(new Post(
+            "Favourite programming language",
+            "What is your favourite programming language and why?",
+            3,
+            2));
+
+        await AddAsync(new Post(
+            "Weekend plans",
+            "Anyone doing anything interesting this weekend?",
+            2,
+            3));
     }
 }

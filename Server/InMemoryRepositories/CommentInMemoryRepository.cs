@@ -5,9 +5,41 @@ namespace InMemoryRepositories;
 
 public class CommentInMemoryRepository : GenericInMemoryRepository<Comment>, ICommentRepository
 {
-    private void SeedData()
+    public CommentInMemoryRepository()
     {
-        AddAsync(new Comment("This is a comment", 1, 1, null));
-        AddAsync(new Comment("This is also a comment", 2, 1, 1));
+        SeedDataAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task SeedDataAsync()
+    {
+        await AddAsync(new Comment(
+            "Hello! Nice to be here.",
+            2,
+            1,
+            null));
+
+        await AddAsync(new Comment(
+            "Welcome!",
+            1,
+            1,
+            1));
+
+        await AddAsync(new Comment(
+            "I am currently working on a C# project.",
+            3,
+            2,
+            null));
+
+        await AddAsync(new Comment(
+            "Async confused me at first too.",
+            2,
+            3,
+            null));
+
+        await AddAsync(new Comment(
+            "Java is still my favourite.",
+            1,
+            4,
+            null));
     }
 }
