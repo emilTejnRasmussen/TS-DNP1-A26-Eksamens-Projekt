@@ -8,22 +8,24 @@ namespace CLI.UI.ManageSubforums;
 public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepository postRepository)
 {
     private readonly CreatePostView _createPostView = new(postRepository);
-    public async Task ShowAsync()
+    private Subforum? _currentSubforum;
+
+    public async Task ShowAsync(int userId)
     {
         while (true)
         {
             ConsoleHelper.PrintHeader("Subforums");
 
-            var subforum = SelectSubforum();
+            _currentSubforum = SelectSubforum();
 
-            if (subforum is null) return;
+            if (_currentSubforum is null) return;
 
-            await DisplaySubforumAsync(subforum);
+            await DisplaySubforumAsync(_currentSubforum, userId);
         }
  
     }
 
-    private async Task DisplaySubforumAsync(Subforum subforum)
+    private async Task DisplaySubforumAsync(Subforum subforum, int userId)
     {
         while (true)
         {
@@ -43,7 +45,7 @@ public class ViewSubforumsView(ISubforumRepository subforumRepository, IPostRepo
                     break;
 
                 case 2:
-                    await _createPostView.ShowAsync();
+                    await _createPostView.ShowAsync(userId, subforum.Id);
                     break;
 
                 case 0:

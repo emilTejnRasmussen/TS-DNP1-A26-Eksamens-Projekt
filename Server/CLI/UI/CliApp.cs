@@ -36,7 +36,7 @@ public class CliApp(
             switch (option)
             {
                 case 1:
-                    await _viewSubforumsView.ShowAsync();
+                    await _viewSubforumsView.ShowAsync(_currentUser.Id);
                     break;
                 case 2:
                     await _createSubforumView.ShowAsync(_currentUser.Id);
