@@ -12,11 +12,12 @@ public class CliApp(
     IUserRepository userRepository,
     ICommentRepository commentRepository,
     IPostRepository postRepository,
-    ISubforumRepository subforumRepository)
+    ISubforumRepository subforumRepository,
+    ICommentVoteRepository commentVoteRepository)
 {
     private readonly CreateUserView _createUserView = new(userRepository);
     private readonly CreateSubforumView _createSubforumView = new(subforumRepository);
-    private readonly ViewSubforumsView _viewSubforumsView = new(subforumRepository, postRepository, commentRepository);
+    private readonly ViewSubforumsView _viewSubforumsView = new(subforumRepository, postRepository, commentRepository, commentVoteRepository);
 
     private User? _currentUser;
 

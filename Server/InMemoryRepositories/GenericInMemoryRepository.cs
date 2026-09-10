@@ -5,7 +5,7 @@ namespace InMemoryRepositories;
 
 public class GenericInMemoryRepository<T> : IRepository<T> where T : IEntity
 {
-    private readonly List<T> _entities = [];
+    protected readonly List<T> _entities = [];
     
     public Task<T> AddAsync(T entity)
     {

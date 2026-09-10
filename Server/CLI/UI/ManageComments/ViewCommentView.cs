@@ -4,9 +4,9 @@ using RepositoryContract;
 
 namespace CLI.UI.ManageComments;
 
-public class ViewCommentView(ICommentRepository commentRepository)
+public class ViewCommentView(ICommentRepository commentRepository, ICommentVoteRepository commentVoteRepository)
 {
-    public void ShowAsync(int userId, Subforum subforum, Post post)
+    public async Task ShowAsync(int userId, Subforum subforum, Post post)
     {
         while (true)
         {
@@ -24,11 +24,11 @@ public class ViewCommentView(ICommentRepository commentRepository)
 
             if (comment is null) return;
 
-            DisplayCommentAsync(comment, userId);
+            await DisplayCommentAsync(comment, userId);
         }
     }
 
-    private void DisplayCommentAsync(Comment comment, int userId)
+    private async Task DisplayCommentAsync(Comment comment, int userId)
     {
         while (true)
         {
@@ -40,15 +40,35 @@ public class ViewCommentView(ICommentRepository commentRepository)
             Console.WriteLine("0. Go back");
 
             var option = ConsoleHelper.ReadInt("Select option: ", 0, 2);
-
+            var commentVote = await commentVoteRepository.GetFromUserIdAndCommentIdAsync(userId, comment.Id);
+            
             switch (option)
             {
                 case 1:
-                    Console.WriteLine($"user {userId} liked this comment");
+                    if (commentVote is null)
+                    {
+                        CommentVote newCommentVote = new(userId, comment.Id, VoteType.Like);
+                        await commentVoteRepository.AddAsync(newCommentVote);
+                    }
+                    else
+                    {
+                        commentVote.VoteType = VoteType.Like;
+                        await commentVoteRepository.UpdateAsync(commentVote);
+                    }
+                    
                     break;
 
                 case 2:
-                    Console.WriteLine($"user {userId} disliked this comment");
+                    if (commentVote is null)
+                    {
+                        CommentVote newCommentVote = new(userId, comment.Id, VoteType.Dislike);
+                        await commentVoteRepository.AddAsync(newCommentVote);
+                    }
+                    else
+                    {
+                        commentVote.VoteType = VoteType.Dislike;
+                        await commentVoteRepository.UpdateAsync(commentVote);
+                    }
                     break;
 
                 case 0:

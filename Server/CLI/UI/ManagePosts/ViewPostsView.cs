@@ -5,10 +5,10 @@ using RepositoryContract;
 
 namespace CLI.UI.ManagePosts;
 
-public class ViewPostsView(IPostRepository postRepository, ICommentRepository commentRepository)
+public class ViewPostsView(IPostRepository postRepository, ICommentRepository commentRepository, ICommentVoteRepository commentVoteRepository)
 {
     private readonly CreateCommentView _createCommentView = new(commentRepository);
-    private readonly ViewCommentView _viewCommentView = new(commentRepository);
+    private readonly ViewCommentView _viewCommentView = new(commentRepository, commentVoteRepository);
     
     public async Task ShowAsync(int userId, Subforum subforum)
     {
@@ -47,11 +47,11 @@ public class ViewPostsView(IPostRepository postRepository, ICommentRepository co
             switch (option)
             {
                 case 1:
-                    _viewCommentView.ShowAsync(userId, subforum, post);
+                    await _viewCommentView.ShowAsync(userId, subforum, post);
                     break;
 
                 case 2:
-                    await _createCommentView.ShowAsync();
+                    await _createCommentView.ShowAsync(userId, post.Id);
                     break;
 
                 case 0:

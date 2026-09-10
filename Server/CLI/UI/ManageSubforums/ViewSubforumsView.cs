@@ -8,10 +8,11 @@ namespace CLI.UI.ManageSubforums;
 public class ViewSubforumsView(
     ISubforumRepository subforumRepository, 
     IPostRepository postRepository, 
-    ICommentRepository commentRepository)
+    ICommentRepository commentRepository,
+    ICommentVoteRepository commentVoteRepository)
 {
     private readonly CreatePostView _createPostView = new(postRepository);
-    private readonly ViewPostsView _viewPostsView = new(postRepository, commentRepository);
+    private readonly ViewPostsView _viewPostsView = new(postRepository, commentRepository, commentVoteRepository);
 
     public async Task ShowAsync(int userId)
     {
