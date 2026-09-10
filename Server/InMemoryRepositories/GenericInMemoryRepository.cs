@@ -50,7 +50,7 @@ public class GenericInMemoryRepository<T> : IRepository<T> where T : IEntity
             : Task.FromResult(existingEntity);
     }
 
-    public IQueryable<T> GetManyAsync()
+    public IQueryable<T> GetMany()
     {
         return _entities.AsQueryable();
     }
