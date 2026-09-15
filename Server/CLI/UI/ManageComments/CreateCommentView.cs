@@ -1,20 +1,45 @@
-﻿using CLI.UI.Helpers;
-using Entities;
+﻿using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI.ManageComments;
 
 public class CreateCommentView(ICommentRepository commentRepository)
 {
-    public async Task ShowAsync(int userId, int postId, int? parentCommentId = null)
+    public async Task ShowAsync(
+        int userId,
+        int postId,
+        int? parentCommentId = null)
     {
-        ConsoleHelper.PrintHeader("Create comment");
+        AnsiConsole.Clear();
 
-        Console.WriteLine("Enter comment: ");
-        var commentBody = Console.ReadLine() ?? "";
+        var title = parentCommentId is null
+            ? "Create Comment"
+            : "Create Reply";
 
-        Comment comment = new(commentBody, userId, postId, parentCommentId);
+        AnsiConsole.Write(
+            new Rule($"[bold]{title}[/]")
+                .LeftJustified()
+        );
 
-        await commentRepository.AddAsync(comment);
+        AnsiConsole.WriteLine();
+
+        var body = AnsiConsole.Prompt(
+            new TextPrompt<string>("Comment:")
+                .Validate(comment =>
+                    string.IsNullOrWhiteSpace(comment)
+                        ? ValidationResult.Error(
+                            "[red]Comment cannot be empty[/]")
+                        : ValidationResult.Success())
+        );
+
+        var newComment = new Comment(
+            body,
+            userId,
+            postId,
+            parentCommentId
+        );
+
+        await commentRepository.AddAsync(newComment);
     }
 }

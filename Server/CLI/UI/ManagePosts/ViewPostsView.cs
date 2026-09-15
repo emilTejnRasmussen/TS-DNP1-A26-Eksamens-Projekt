@@ -15,8 +15,7 @@ public class ViewPostsView(
     private readonly CreatePostView _createPostView = new(postRepository);
     private readonly CreateCommentView _createCommentView = new(commentRepository);
 
-    private readonly ViewCommentView _viewCommentView =
-        new(commentRepository, commentVoteRepository);
+    private readonly ViewCommentView _viewCommentView = new(commentRepository, commentVoteRepository, userRepository);
 
     public async Task ShowAsync(int userId, Subforum subforum)
     {

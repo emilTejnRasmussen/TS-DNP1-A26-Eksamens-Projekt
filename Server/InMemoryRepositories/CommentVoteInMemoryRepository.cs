@@ -15,7 +15,13 @@ public class CommentVoteInMemoryRepository : GenericInMemoryRepository<CommentVo
         var existingEntity = _entities.SingleOrDefault(cv => cv.UserId == userId && cv.CommentId == commentId);
         return Task.FromResult(existingEntity);
     }
-    
+
+    public Task<int> CountByCommentIdAndVoteTypeAsync(int commentId, VoteType voteType)
+    {
+        var result = _entities.Count(vote => vote.CommentId == commentId && vote.VoteType == voteType);
+        return Task.FromResult(result);
+    }
+
     private async Task SeedDataAsync()
     {
         await AddAsync(new CommentVote(
