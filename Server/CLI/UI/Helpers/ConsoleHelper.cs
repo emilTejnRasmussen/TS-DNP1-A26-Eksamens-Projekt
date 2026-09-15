@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Spectre.Console;
 
 namespace CLI.UI.Helpers;
 
@@ -6,9 +7,7 @@ public class ConsoleHelper
 {
     public static void PrintHeader(string title)
     {
-        Console.WriteLine();
-        Console.WriteLine($"=== {title} ===");
-        Console.WriteLine();
+        AnsiConsole.Write(new Rule($"[bold]{title}[/]").LeftJustified());
     }
 
     public static void PrintError(string message)

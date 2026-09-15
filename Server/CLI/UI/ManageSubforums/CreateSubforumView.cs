@@ -1,6 +1,7 @@
 ﻿using CLI.UI.Helpers;
 using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI.ManageSubforums;
 
@@ -8,13 +9,10 @@ public class CreateSubforumView(ISubforumRepository subforumRepository)
 {
     public async Task ShowAsync(int creatorId)
     {
-        ConsoleHelper.PrintHeader("Create a subforum");
+        var name = AnsiConsole.Ask<string>("What's your subforums [green]name[/]?");
+        AnsiConsole.MarkupLine($"Subforum, [blue]{name} created[/]!");
+        var description = AnsiConsole.Ask<string>("Enter a short [green]description[/]:");
         
-        Console.Write("Enter subforum name: ");
-        var name = Console.ReadLine() ?? "";
-        
-        Console.Write("Enter a short description: ");
-        var description = Console.ReadLine() ?? "";
 
         Subforum subforum = new(name, description, creatorId);
 

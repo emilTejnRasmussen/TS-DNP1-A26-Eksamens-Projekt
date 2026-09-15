@@ -5,6 +5,7 @@ using CLI.UI.ManageSubforums;
 using CLI.UI.ManageUsers;
 using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI;
 
@@ -15,9 +16,14 @@ public class CliApp(
     ISubforumRepository subforumRepository,
     ICommentVoteRepository commentVoteRepository)
 {
-    private readonly CreateUserView _createUserView = new(userRepository);
+    private readonly AuthUser _authUser = new(userRepository);
     private readonly CreateSubforumView _createSubforumView = new(subforumRepository);
-    private readonly ViewSubforumsView _viewSubforumsView = new(subforumRepository, postRepository, commentRepository, commentVoteRepository);
+    private readonly ViewSubforumsView _viewSubforumsView = new(
+        subforumRepository, 
+        postRepository, 
+        commentRepository, 
+        commentVoteRepository, 
+        userRepository);
 
     private User? _currentUser;
 
@@ -26,37 +32,39 @@ public class CliApp(
         var running = true;
         while (running)
         {
+            AnsiConsole.Clear();
+            
             if (_currentUser is null)
             {
-               _currentUser = await _createUserView.ShowAsync();
+               _currentUser = await _authUser.ShowAsync();
                continue;
             }
 
-            var option = PrintMenu();
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select an [green]option[/]:")
+                    .AddChoices("View subforums", "Create new subforum", "Update a subforum", "Delete a subforum", "Quit"));
+  
+            // AnsiConsole.MarkupLine($"Deploying to [blue]{choice}[/]");
 
-            switch (option)
+            switch (choice)
             {
-                case 1:
+                case "View subforums":
                     await _viewSubforumsView.ShowAsync(_currentUser.Id);
                     break;
-                case 2:
+                case "Create new subforum":
                     await _createSubforumView.ShowAsync(_currentUser.Id);
                     break;
-                case 0:
+                case "Update a subforum":
+                    Console.WriteLine("Not implemenmted");
+                    break;
+                case "Delete a subforum":
+                    Console.WriteLine("Not implemenmted!");
+                    break;
+                case "Quit":
                     running = false;
                     break;
             }
         }
-    }
-
-    private int PrintMenu()
-    {
-        ConsoleHelper.PrintHeader("Forum");
-        Console.WriteLine("1. View subforums");
-        Console.WriteLine("2. Create subforum");
-        Console.WriteLine();
-        Console.WriteLine("0. Exit program");
-
-        return ConsoleHelper.ReadInt("Enter option: ");
     }
 }

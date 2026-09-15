@@ -2,6 +2,7 @@
 using CLI.UI.ManagePosts;
 using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI.ManageSubforums;
 
@@ -9,53 +10,68 @@ public class ViewSubforumsView(
     ISubforumRepository subforumRepository, 
     IPostRepository postRepository, 
     ICommentRepository commentRepository,
-    ICommentVoteRepository commentVoteRepository)
+    ICommentVoteRepository commentVoteRepository,
+    IUserRepository userRepository)
 {
-    private readonly CreatePostView _createPostView = new(postRepository);
-    private readonly ViewPostsView _viewPostsView = new(postRepository, commentRepository, commentVoteRepository);
+    private readonly ViewPostsView _viewPostsView = new(
+        postRepository, 
+        commentRepository, 
+        commentVoteRepository, 
+        userRepository);
 
     public async Task ShowAsync(int userId)
     {
         while (true)
         {
+            AnsiConsole.Clear();
+            
             ConsoleHelper.PrintHeader("Subforums");
-
+            
             var subforums = subforumRepository.GetMany().ToList();
-            var subforum = ConsoleHelper.SelectFromList(subforums, s => s.Name);
 
-            if (subforum is null) return;
+            var creatorNames = new Dictionary<int, string>();
+            var postCounts = new Dictionary<int, int>();
 
-            await DisplaySubforumAsync(subforum, userId);
-        }
- 
-    }
-
-    private async Task DisplaySubforumAsync(Subforum subforum, int userId)
-    {
-        while (true)
-        {
-            ConsoleHelper.PrintHeader(subforum.Name);
-
-            Console.WriteLine("1. View posts");
-            Console.WriteLine("2. Create post");
-            Console.WriteLine();
-            Console.WriteLine("0. Go back");
-
-            var option = ConsoleHelper.ReadInt("Select option: ", 0, 2);
-
-            switch (option)
+            foreach (var subforum in subforums)
             {
-                case 1:
-                    await _viewPostsView.ShowAsync(userId, subforum);
-                    break;
+                var postCount = await postRepository.CountBySubforumIdAsync(subforum.Id);
+                postCounts[subforum.Id] = postCount;
 
-                case 2:
-                    await _createPostView.ShowAsync(userId, subforum.Id);
-                    break;
-
-                case 0:
-                    return;
+                if (creatorNames.ContainsKey(subforum.CreatorId)) continue;
+                
+                var user = await userRepository.GetSingleAsync(subforum.CreatorId);
+                creatorNames[subforum.CreatorId] = user.Username;
             }
+
+            var choices = subforums
+                .Select(x => x.Id)
+                .Append(0)
+                .ToList();
+
+            var selectedId = AnsiConsole.Prompt(
+                new SelectionPrompt<int>()
+                    .Title($"[grey]  {"TITLE",-28}{"CREATED BY",-20}{"POSTS",5}[/]")
+                    .UseConverter(id =>
+                    {
+                        if (id == 0) return "[grey]<- Go back[/]";
+
+                        var subforum = subforums.First(x => x.Id == id);
+
+                        return
+                            $"{Markup.Escape(subforum.Name),-28}" +
+                            $"{Markup.Escape(creatorNames[subforum.CreatorId]),-20}" +
+                            $"[blue]{postCounts[subforum.Id],5}[/]";
+                    })
+                    .AddChoices(choices)
+            );
+
+            if (selectedId == 0)
+                return;
+
+            var selected = subforums.First(x => x.Id == selectedId);
+
+            
+            await _viewPostsView.ShowAsync(userId, selected);
         }
     }
 }

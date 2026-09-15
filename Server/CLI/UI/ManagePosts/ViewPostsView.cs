@@ -1,60 +1,122 @@
-﻿using CLI.UI.Helpers;
-using CLI.UI.ManageComments;
+﻿using CLI.UI.ManageComments;
 using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI.ManagePosts;
 
-public class ViewPostsView(IPostRepository postRepository, ICommentRepository commentRepository, ICommentVoteRepository commentVoteRepository)
+public class ViewPostsView(
+    IPostRepository postRepository,
+    ICommentRepository commentRepository,
+    ICommentVoteRepository commentVoteRepository,
+    IUserRepository userRepository)
 {
+    private readonly CreatePostView _createPostView = new(postRepository);
     private readonly CreateCommentView _createCommentView = new(commentRepository);
-    private readonly ViewCommentView _viewCommentView = new(commentRepository, commentVoteRepository);
-    
+    private readonly ViewCommentView _viewCommentView =
+        new(commentRepository, commentVoteRepository);
+
     public async Task ShowAsync(int userId, Subforum subforum)
     {
         while (true)
         {
-            ConsoleHelper.PrintHeader(subforum.Name);
-            Console.WriteLine(subforum.Description);
+            AnsiConsole.Clear();
 
-            ConsoleHelper.PrintDivider();
+            AnsiConsole.MarkupLine($"[bold]{Markup.Escape(subforum.Name)}[/]");
+            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(subforum.Description)}[/]");
+            AnsiConsole.WriteLine();
 
             var posts = postRepository
                 .GetMany()
-                .Where(p => p.SubforumId == subforum.Id)
+                .Where(post => post.SubforumId == subforum.Id)
                 .ToList();
-            
-            var post = ConsoleHelper.SelectFromList(posts, p => p.Title);
-            
-            if (post is null) return;
 
-            await DisplayPostAsync(subforum, post, userId);
-        }    
+            var creatorNames = new Dictionary<int, string>();
+
+            foreach (var post in posts.Where(post => !creatorNames.ContainsKey(post.UserId)))
+            {
+                var user = await userRepository.GetSingleAsync(post.UserId);
+                creatorNames[post.UserId] = user.Username;
+            }
+
+            var choices = posts
+                .Select(post => post.Id)
+                .Append(-1) 
+                .Append(0)  
+                .ToList();
+
+            var selectedId = AnsiConsole.Prompt(
+                new SelectionPrompt<int>()
+                    .Title(
+                        $"[grey]  {"TITLE",-32}{"WRITTEN BY",-20}[/]")
+                    .PageSize(10)
+                    .UseConverter(id =>
+                    {
+                        switch (id)
+                        {
+                            case -1:
+                                return "[green]+ Create post[/]";
+                            case 0:
+                                return "[grey]<- Go back[/]";
+                            default:
+                            {
+                                var post = posts.First(post => post.Id == id);
+
+                                return
+                                    $"{Markup.Escape(post.Title),-32}" +
+                                    $"{Markup.Escape(creatorNames[post.UserId]),-20}";
+                            }
+                        }
+                    })
+                    .AddChoices(choices)
+            );
+
+            switch (selectedId)
+            {
+                case 0:
+                    return;
+
+                case -1:
+                    await _createPostView.ShowAsync(userId, subforum.Id);
+                    continue;
+            }
+
+            var selectedPost = posts.First(post => post.Id == selectedId);
+
+            await DisplayPostAsync(subforum, selectedPost, userId);
+        }
     }
 
-    private async Task DisplayPostAsync(Subforum subforum, Post post, int userId)
+    private async Task DisplayPostAsync(
+        Subforum subforum,
+        Post post,
+        int userId)
     {
         while (true)
         {
-            ConsoleHelper.PrintHeader(post.Title);
-            Console.WriteLine("1. View comments");
-            Console.WriteLine("2. Create comment");
-            Console.WriteLine();
-            Console.WriteLine("0. Go back");
+            AnsiConsole.Clear();
 
-            var option = ConsoleHelper.ReadInt("Select option: ", 0, 2);
+            var option = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[bold]{Markup.Escape(post.Title)}[/]")
+                    .AddChoices(
+                        "View comments",
+                        "Create comment",
+                        "<- Go back"
+                    )
+            );
 
             switch (option)
             {
-                case 1:
+                case "View comments":
                     await _viewCommentView.ShowAsync(userId, subforum, post);
                     break;
 
-                case 2:
+                case "Create comment":
                     await _createCommentView.ShowAsync(userId, post.Id);
                     break;
 
-                case 0:
+                case "<- Go back":
                     return;
             }
         }
