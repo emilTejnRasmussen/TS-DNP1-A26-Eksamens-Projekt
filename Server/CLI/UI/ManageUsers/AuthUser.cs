@@ -11,30 +11,65 @@ public class AuthUser(IUserRepository userRepository)
 
     public async Task<User> ShowAsync()
     {
-        User user = null;
-
-        while (user is null)
+        while (true)
         {
             AnsiConsole.Clear();
-            
+
             ConsoleHelper.PrintHeader("Auth");
 
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Select an [green]option[/]:")
-                    .AddChoices("Login", "Create new account"));
+                    .AddChoices("Login", "Create new account"
+                    )
+            );
 
             switch (choice)
             {
                 case "Login":
-                    Console.WriteLine("Not implemented bc in memory");
+                {
+                    var user = await LoginAsync();
+
+                    if (user is not null)
+                        return user;
+
                     break;
+                }
+
                 case "Create new account":
-                    user = await _createUserView.ShowAsync();
-                    break;
+                    return await _createUserView.ShowAsync();
             }
         }
-        
-        return user;
+    }
+
+    private async Task<User?> LoginAsync()
+    {
+        AnsiConsole.Clear();
+
+        AnsiConsole.Write(
+            new Rule("[bold]Login[/]")
+                .LeftJustified()
+        );
+
+        AnsiConsole.WriteLine();
+
+        var username = AnsiConsole.Ask<string>("Username:");
+
+        var password = AnsiConsole.Prompt(
+            new TextPrompt<string>("Password:")
+                .Secret()
+        );
+
+        var user = await userRepository.GetByUsernameAsync(username);
+
+
+        if (user is not null && user.Password == password) return user;
+
+        AnsiConsole.MarkupLine("[red]Invalid username or password.[/]");
+        AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+
+        Console.ReadKey(true);
+
+        return null;
     }
 }

@@ -10,6 +10,12 @@ public class UserInMemoryRepository : GenericInMemoryRepository<User>, IUserRepo
         SeedDataAsync().GetAwaiter().GetResult();
     }
 
+    public Task<User?> GetByUsernameAsync(string username)
+    {
+        var result = _entities.FirstOrDefault(u => u.Username == username);
+        return Task.FromResult(result);
+    }
+
     private async Task SeedDataAsync()
     {
         await AddAsync(new User("joe", "1234"));
