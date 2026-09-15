@@ -14,7 +14,8 @@ public class CliApp(
     ICommentRepository commentRepository,
     IPostRepository postRepository,
     ISubforumRepository subforumRepository,
-    ICommentVoteRepository commentVoteRepository)
+    ICommentVoteRepository commentVoteRepository,
+    IPostVoteRepository postVoteRepository)
 {
     private readonly AuthUser _authUser = new(userRepository);
     private readonly CreateSubforumView _createSubforumView = new(subforumRepository);
@@ -23,7 +24,8 @@ public class CliApp(
         postRepository, 
         commentRepository, 
         commentVoteRepository, 
-        userRepository);
+        userRepository,
+        postVoteRepository);
 
     private User? _currentUser;
 

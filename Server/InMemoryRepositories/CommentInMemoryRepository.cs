@@ -17,6 +17,11 @@ public class CommentInMemoryRepository : GenericInMemoryRepository<Comment>, ICo
         return Task.FromResult(count);
     }
 
+    public Task<int> CountByPostIdAsync(int postId)
+    {
+        return Task.FromResult(_entities.Count(comment => comment.PostId == postId));
+    }
+
     private async Task SeedDataAsync()
     {
         await AddAsync(new Comment(

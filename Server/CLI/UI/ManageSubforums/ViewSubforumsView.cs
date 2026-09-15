@@ -11,10 +11,12 @@ public class ViewSubforumsView(
     IPostRepository postRepository, 
     ICommentRepository commentRepository,
     ICommentVoteRepository commentVoteRepository,
-    IUserRepository userRepository)
+    IUserRepository userRepository,
+    IPostVoteRepository postVoteRepository)
 {
     private readonly ViewPostsView _viewPostsView = new(
         postRepository, 
+        postVoteRepository, 
         commentRepository, 
         commentVoteRepository, 
         userRepository);
