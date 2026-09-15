@@ -3,6 +3,8 @@ using RepositoryContract;
 
 namespace InMemoryRepositories;
 
+// TODO: Handle cascading deletes when business layer is introduced.
+
 public class GenericInMemoryRepository<T> : IRepository<T> where T : IEntity
 {
     protected readonly List<T> _entities = [];
