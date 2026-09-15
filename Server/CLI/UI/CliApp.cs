@@ -64,7 +64,7 @@ public class CliApp(
                     break;
 
                 case "My account":
-                    await _accountView.ShowAsync(_currentUser);
+                    _currentUser = await _accountView.ShowAsync(_currentUser);
                     break;
 
                 case "Log out":

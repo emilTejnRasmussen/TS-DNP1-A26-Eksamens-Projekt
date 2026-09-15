@@ -2,7 +2,7 @@
 using RepositoryContract;
 using Spectre.Console;
 
-namespace CLI.UI.Helpers;
+namespace CLI.UI.ManageComments;
 
 public class ManageCommentsView(
     ICommentRepository commentRepository)

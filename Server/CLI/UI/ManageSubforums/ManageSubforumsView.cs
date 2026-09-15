@@ -1,9 +1,8 @@
-﻿using CLI.UI.ManageSubforums;
-using Entities;
+﻿using Entities;
 using RepositoryContract;
 using Spectre.Console;
 
-namespace CLI.UI.Helpers;
+namespace CLI.UI.ManageSubforums;
 
 public class ManageSubforumsView(
     ISubforumRepository subforumRepository)

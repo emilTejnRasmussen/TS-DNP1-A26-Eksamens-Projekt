@@ -2,7 +2,7 @@
 using RepositoryContract;
 using Spectre.Console;
 
-namespace CLI.UI.Helpers;
+namespace CLI.UI.ManagePosts;
 
 public class ManagePostsView(
     IPostRepository postRepository)
