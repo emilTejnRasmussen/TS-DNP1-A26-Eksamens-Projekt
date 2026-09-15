@@ -1,79 +1,127 @@
-﻿using CLI.UI.Helpers;
-using Entities;
+﻿using Entities;
 using RepositoryContract;
+using Spectre.Console;
 
 namespace CLI.UI.ManageComments;
 
-public class ViewCommentView(ICommentRepository commentRepository, ICommentVoteRepository commentVoteRepository)
+public class ViewCommentView(
+    ICommentRepository commentRepository,
+    ICommentVoteRepository commentVoteRepository)
 {
-    public async Task ShowAsync(int userId, Subforum subforum, Post post)
+    private readonly CreateCommentView _createCommentView = new(commentRepository);
+
+    public async Task ShowAsync(int userId, Comment comment)
     {
         while (true)
         {
-            ConsoleHelper.PrintHeader(subforum.Name);
-            Console.WriteLine(post.Title);
+            AnsiConsole.Clear();
 
-            ConsoleHelper.PrintDivider();
+            AnsiConsole.Write(
+                new Panel(Markup.Escape(comment.Body))
+                    .Header("[bold]Comment[/]")
+                    .Expand()
+            );
 
-            var comments = commentRepository
+            AnsiConsole.WriteLine();
+
+            var replies = commentRepository
                 .GetMany()
-                .Where(c => c.PostId == post.Id)
+                .Where(c => c.ParentCommentId == comment.Id)
                 .ToList();
 
-            var comment = ConsoleHelper.SelectFromList(comments, c => c.Body);
+            const int replyAction = -1;
+            const int likeAction = -2;
+            const int dislikeAction = -3;
+            const int goBackAction = 0;
 
-            if (comment is null) return;
+            var choices = replies
+                .Select(reply => reply.Id)
+                .Append(replyAction)
+                .Append(likeAction)
+                .Append(dislikeAction)
+                .Append(goBackAction)
+                .ToList();
 
-            await DisplayCommentAsync(comment, userId);
+            var selectedId = AnsiConsole.Prompt(
+                new SelectionPrompt<int>()
+                    .Title("[grey]Replies[/]")
+                    .PageSize(10)
+                    .UseConverter(id =>
+                    {
+                        return id switch
+                        {
+                            replyAction => "[green]+ Reply[/]",
+                            likeAction => "Like",
+                            dislikeAction => "Dislike",
+                            goBackAction => "[grey]<- Go back[/]",
+                            _ => Markup.Escape(
+                                replies.First(reply => reply.Id == id).Body)
+                        };
+                    })
+                    .AddChoices(choices)
+            );
+
+            switch (selectedId)
+            {
+                case replyAction:
+                    await _createCommentView.ShowAsync(
+                        userId,
+                        comment.PostId,
+                        comment.Id);
+                    break;
+
+                case likeAction:
+                    await VoteAsync(
+                        comment,
+                        userId,
+                        VoteType.Like);
+                    break;
+
+                case dislikeAction:
+                    await VoteAsync(
+                        comment,
+                        userId,
+                        VoteType.Dislike);
+                    break;
+
+                case goBackAction:
+                    return;
+
+                default:
+                    var selectedReply =
+                        await commentRepository.GetSingleAsync(selectedId);
+
+                    await ShowAsync(userId, selectedReply);
+                    break;
+            }
         }
     }
 
-    private async Task DisplayCommentAsync(Comment comment, int userId)
+    private async Task VoteAsync(
+        Comment comment,
+        int userId,
+        VoteType voteType)
     {
-        while (true)
+        var vote =
+            await commentVoteRepository
+                .GetFromUserIdAndCommentIdAsync(
+                    userId,
+                    comment.Id);
+
+        if (vote is null)
         {
-            ConsoleHelper.PrintHeader(comment.Body);
+            var newVote = new CommentVote(
+                userId,
+                comment.Id,
+                voteType);
 
-            Console.WriteLine("1. Like comment");
-            Console.WriteLine("2. Dislike comment");
-            Console.WriteLine();
-            Console.WriteLine("0. Go back");
+            await commentVoteRepository.AddAsync(newVote);
+        }
+        else
+        {
+            vote.VoteType = voteType;
 
-            var option = ConsoleHelper.ReadInt("Select option: ", 0, 2);
-            var commentVote = await commentVoteRepository.GetFromUserIdAndCommentIdAsync(userId, comment.Id);
-            
-            switch (option)
-            {
-                case 1:
-                    if (commentVote is null)
-                    {
-                        CommentVote newCommentVote = new(userId, comment.Id, VoteType.Like);
-                        await commentVoteRepository.AddAsync(newCommentVote);
-                    }
-                    else
-                    {
-                        commentVote.VoteType = VoteType.Like;
-                        await commentVoteRepository.UpdateAsync(commentVote);
-                    }
-                    
-                    break;
-
-                case 2:
-                    if (commentVote is null)
-                    {
-                        CommentVote newCommentVote = new(userId, comment.Id, VoteType.Dislike);
-                        await commentVoteRepository.AddAsync(newCommentVote);
-                    }
-                    else
-                    {
-                        commentVote.VoteType = VoteType.Dislike;
-                        await commentVoteRepository.UpdateAsync(commentVote);
-                    }
-                    break;
-
-                case 0:
-                    return;
-            }
+            await commentVoteRepository.UpdateAsync(vote);
         }
     }
 }

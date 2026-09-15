@@ -96,28 +96,72 @@ public class ViewPostsView(
         {
             AnsiConsole.Clear();
 
-            var option = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title($"[bold]{Markup.Escape(post.Title)}[/]")
-                    .AddChoices(
-                        "View comments",
-                        "Create comment",
-                        "<- Go back"
-                    )
+            AnsiConsole.Write(
+                new Panel(Markup.Escape(post.Body))
+                    .Header($"[bold]{Markup.Escape(post.Title)}[/]")
+                    .Expand()
             );
 
-            switch (option)
-            {
-                case "View comments":
-                    await _viewCommentView.ShowAsync(userId, subforum, post);
-                    break;
+            AnsiConsole.WriteLine();
 
-                case "Create comment":
+            var comments = commentRepository
+                .GetMany()
+                .Where(comment =>
+                    comment.PostId == post.Id &&
+                    comment.ParentCommentId == null)
+                .ToList();
+            
+            var replyCounts = new Dictionary<int, int>();
+
+            foreach (var comment in comments)
+            {
+                replyCounts[comment.Id] = await commentRepository.CountByParentCommentIdAsync(comment.Id);
+            }
+
+            var choices = comments
+                .Select(comment => comment.Id)
+                .Append(-1) // Create comment
+                .Append(0)  // Go back
+                .ToList();
+
+            var selectedId = AnsiConsole.Prompt(
+                new SelectionPrompt<int>()
+                    .Title($"[grey]  {"COMMENT",-50}{"REPLIES",7}[/]")
+                    .PageSize(10)
+                    .UseConverter(id =>
+                    {
+                        switch (id)
+                        {
+                            case -1:
+                                return "[green]+ Create comment[/]";
+                            case 0:
+                                return "[grey]<- Go back[/]";
+                            default:
+                            {
+                                var comment = comments.First(c => c.Id == id);
+
+                                return
+                                    $"{Markup.Escape(comment.Body),-50}" +
+                                    $"[blue]{replyCounts[comment.Id],7}[/]";
+                            }
+                        }
+                    })
+                    .AddChoices(choices)
+            );
+
+            switch (selectedId)
+            {
+                case -1:
                     await _createCommentView.ShowAsync(userId, post.Id);
                     break;
 
-                case "<- Go back":
+                case 0:
                     return;
+
+                default:
+                    var selectedComment = comments.First(c => c.Id == selectedId);
+                    await _viewCommentView.ShowAsync(userId, selectedComment);
+                    break;
             }
         }
     }
