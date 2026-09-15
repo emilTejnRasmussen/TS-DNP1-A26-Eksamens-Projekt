@@ -10,6 +10,12 @@ public class PostInMemoryRepository : GenericInMemoryRepository<Post>, IPostRepo
         SeedDataAsync().GetAwaiter().GetResult();
     }
 
+    public Task<int> CountBySubforumIdAsync(int subforumId)
+    {
+        var count = _entities.Count(p => p.SubforumId == subforumId);
+        return Task.FromResult(count);
+    }
+
     private async Task SeedDataAsync()
     {
         await AddAsync(new Post(
