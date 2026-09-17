@@ -7,10 +7,12 @@ namespace FileRepositories;
 
 public class GenericFileRepository<T> : IRepository<T> where T : IEntity
 {
-    private readonly string _filepath = typeof(T).Name + ".json";
+    private readonly string _filepath = "data/" + typeof(T).Name + ".json";
     
     public GenericFileRepository()
     {
+        Directory.CreateDirectory("data");
+        
         if (!File.Exists(_filepath))
         {
             File.WriteAllText(_filepath, "[]");
