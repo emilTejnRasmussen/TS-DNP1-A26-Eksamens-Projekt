@@ -8,6 +8,10 @@ namespace FileRepositories;
 public class GenericFileRepository<T> : IRepository<T> where T : IEntity
 {
     private readonly string _filepath = "data/" + typeof(T).Name + ".json";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true
+    };
     
     public GenericFileRepository()
     {
@@ -89,7 +93,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
 
     private async Task WriteAllEntities(List<T> entities)
     {
-        var entityAsJson = JsonSerializer.Serialize(entities);
+        var entityAsJson = JsonSerializer.Serialize(entities, JsonOptions);
 
         await File.WriteAllTextAsync(_filepath, entityAsJson);
     }
