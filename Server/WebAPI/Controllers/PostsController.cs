@@ -8,7 +8,7 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PostsController(IPostRepository postRepo) : ControllerBase
+public class PostsController(IPostRepository postRepo, ICommentRepository commentRepo) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
@@ -76,23 +76,34 @@ public class PostsController(IPostRepository postRepo) : ControllerBase
         return NoContent();
     }
 
-    
+
     [HttpPost("{postId:int}/comments")]
     public async Task<IActionResult> AddComment(
         [FromRoute] int postId,
-        [FromBody] CreateCommentDto request,
-        [FromServices] ICommentRepository commentRepo
+        [FromBody] CreateCommentDto request
     )
     {
         await postRepo.GetSingleAsync(postId);
-        
+
         var created = await commentRepo.AddAsync(CommentMapper.ToEntity(request, postId));
 
         return Created($"/comments/{created.Id}", CommentMapper.ToDto(created));
     }
+    
+    [HttpGet("{postId:int}/comments")]
+    public IActionResult GetComments(
+        [FromRoute] int postId
+    )
+    {
+        var commentDtos = commentRepo.GetMany()
+            .Where(post => post.Id == postId)
+            .AsEnumerable()
+            .Select(CommentMapper.ToDto)
+            .ToList();
 
-    //     GET     /posts/{postId}/comments
-    //
+        return Ok(commentDtos);
+    }
+    
     //     POST    /posts/{postId}/votes
     //     GET     /posts/{postId}/votes
 }
