@@ -42,7 +42,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
     {
         var entities = await ReadAllEntities();
 
-        var existingEntity = entities.SingleOrDefault(entity);
+        var existingEntity = entities.SingleOrDefault(e => e.Id == entity.Id);
         
         if (existingEntity is null)
         {
@@ -51,6 +51,8 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
 
         entities.Remove(existingEntity);
         entities.Add(entity);
+
+        await WriteAllEntities(entities);
     }
 
     public async Task DeleteAsync(int id)
@@ -65,6 +67,8 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
         }
 
         entities.Remove(entityToDelete);
+
+        await WriteAllEntities(entities);
     }
 
     public async Task<T> GetSingleAsync(int id)
