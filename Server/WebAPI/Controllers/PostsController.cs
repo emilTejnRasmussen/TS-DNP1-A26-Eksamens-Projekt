@@ -1,5 +1,4 @@
 ﻿using DTO.Posts;
-using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using WebApi.Mappers;
@@ -29,6 +28,32 @@ public class PostsController(IPostRepository postRepo) : ControllerBase
         return Ok(PostMapper.ToDto(post));
     }
 
+    [HttpGet]
+    public IActionResult GetPosts(
+        [FromQuery] string? titleContains = null,
+        [FromQuery] int? userId = null
+    )
+    {
+        var posts = postRepo.GetMany();
+
+        if (!string.IsNullOrWhiteSpace(titleContains))
+        {
+            posts = posts.Where(p => p.Title.Contains(titleContains));
+        }
+
+        if (userId.HasValue)
+        {
+            posts = posts.Where(p => p.UserId == userId);
+        }
+
+        var dtos = posts
+            .AsEnumerable()
+            .Select(PostMapper.ToDto)
+            .ToList();
+
+        return Ok(dtos);
+    }
+
     [HttpPatch("{id:int}")]
     public async Task<IActionResult> UpdatePost([FromRoute] int id, [FromBody] UpdatePostDto request)
     {
@@ -38,6 +63,14 @@ public class PostsController(IPostRepository postRepo) : ControllerBase
         postToUpdate.Body = request.Body;
 
         await postRepo.UpdateAsync(postToUpdate);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeletePost([FromRoute] int id)
+    {
+        await postRepo.DeleteAsync(id);
 
         return NoContent();
     }
