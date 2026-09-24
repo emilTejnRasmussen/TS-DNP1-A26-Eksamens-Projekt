@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Entities;
 using RepositoryContract;
+using RepositoryContract.Exceptions;
 
 namespace FileRepositories;
 
@@ -46,7 +46,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
         
         if (existingEntity is null)
         {
-            throw new InvalidOperationException($"{typeof(T).Name} with ID '{entity.Id}' not found");
+            throw new EntityNotFoundException($"{typeof(T).Name} with ID '{entity.Id}' not found");
         }
 
         entities.Remove(existingEntity);
@@ -63,7 +63,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
         
         if (entityToDelete is null)
         {
-            throw new InvalidOperationException($"{typeof(T).Name} with ID '{id}' not found");
+            throw new EntityNotFoundException($"{typeof(T).Name} with ID '{id}' not found");
         }
 
         entities.Remove(entityToDelete);
@@ -78,7 +78,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
         var existingEntity = entities.SingleOrDefault(e => e.Id == id);
 
         return existingEntity 
-               ?? throw new InvalidOperationException($"{typeof(T).Name} with ID '{id}' not found");
+               ?? throw new EntityNotFoundException($"{typeof(T).Name} with ID '{id}' not found");
     }
 
     public IQueryable<T> GetMany()
