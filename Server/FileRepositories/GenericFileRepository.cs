@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Entities;
 using RepositoryContract;
 using RepositoryContract.Exceptions;
@@ -10,7 +11,11 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
     private readonly string _filepath = "data/" + typeof(T).Name + ".json";
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Converters =
+        {
+            new JsonStringEnumConverter()
+        }
     };
     
     public GenericFileRepository()
@@ -90,7 +95,7 @@ public class GenericFileRepository<T> : IRepository<T> where T : IEntity
     protected async Task<List<T>> ReadAllEntities()
     {
         var entityAsJson = await File.ReadAllTextAsync(_filepath);
-        var entities = JsonSerializer.Deserialize<List<T>>(entityAsJson);
+        var entities = JsonSerializer.Deserialize<List<T>>(entityAsJson, JsonOptions);
 
         return entities ?? throw new InvalidDataException("Deserialized data was null.");
     }

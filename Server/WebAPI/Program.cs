@@ -1,10 +1,19 @@
+using System.Text.Json.Serialization;
 using FileRepositories;
 using RepositoryContract;
+using Services;
 using WebApi.ExceptionHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options => 
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -15,6 +24,8 @@ builder.Services.AddScoped<ICommentRepository, CommentFileRepository>();
 builder.Services.AddScoped<ICommentVoteRepository, CommentVoteFileRepository>();
 builder.Services.AddScoped<ISubforumRepository, SubforumFileRepository>();
 builder.Services.AddScoped<IUserRepository, UserFileRepository>();
+
+builder.Services.AddScoped<IPostVoteService, PostVoteService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

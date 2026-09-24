@@ -1,7 +1,9 @@
 ﻿using DTO.Comment;
 using DTO.Posts;
+using DTO.PostVote;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
+using Services;
 using WebApi.Mappers;
 
 namespace WebApi.Controllers;
@@ -89,11 +91,9 @@ public class PostsController(IPostRepository postRepo, ICommentRepository commen
 
         return Created($"/comments/{created.Id}", CommentMapper.ToDto(created));
     }
-    
+
     [HttpGet("{postId:int}/comments")]
-    public IActionResult GetComments(
-        [FromRoute] int postId
-    )
+    public IActionResult GetComments([FromRoute] int postId)
     {
         var commentDtos = commentRepo.GetMany()
             .Where(post => post.Id == postId)
@@ -104,6 +104,23 @@ public class PostsController(IPostRepository postRepo, ICommentRepository commen
         return Ok(commentDtos);
     }
     
-    //     POST    /posts/{postId}/votes
+    
+    [HttpPut("{postId:int}/votes")]
+    public async Task<IActionResult> AddVote(
+        [FromRoute] int postId,
+        [FromBody] PostVoteDto request,
+        [FromServices] IPostVoteService postVoteService
+    )
+    {
+        await postVoteService.SetVoteAsync(
+            postId,
+            request.UserId,
+            request.VoteType
+        );
+
+        return NoContent();
+    }
+
+
     //     GET     /posts/{postId}/votes
 }
