@@ -1,4 +1,5 @@
-﻿using DTO.Posts;
+﻿using DTO.Comment;
+using DTO.Posts;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using WebApi.Mappers;
@@ -74,11 +75,22 @@ public class PostsController(IPostRepository postRepo) : ControllerBase
 
         return NoContent();
     }
+
     
-    
-    //     POST    /posts/{postId}/comments
-    
-    
+    [HttpPost("{postId:int}/comments")]
+    public async Task<IActionResult> AddComment(
+        [FromRoute] int postId,
+        [FromBody] CreateCommentDto request,
+        [FromServices] ICommentRepository commentRepo
+    )
+    {
+        await postRepo.GetSingleAsync(postId);
+        
+        var created = await commentRepo.AddAsync(CommentMapper.ToEntity(request, postId));
+
+        return Created($"/comments/{created.Id}", CommentMapper.ToDto(created));
+    }
+
     //     GET     /posts/{postId}/comments
     //
     //     POST    /posts/{postId}/votes
