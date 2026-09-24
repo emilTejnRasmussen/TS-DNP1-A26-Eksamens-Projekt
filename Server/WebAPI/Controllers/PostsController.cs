@@ -49,7 +49,7 @@ public class PostsController(
 
         if (userId.HasValue)
         {
-            posts = posts.Where(p => p.UserId == userId);
+            posts = posts.Where(p => p.UserId == userId.Value);
         }
 
         var dtos = posts
@@ -96,10 +96,12 @@ public class PostsController(
     }
 
     [HttpGet("{postId:int}/comments")]
-    public IActionResult GetComments([FromRoute] int postId)
+    public async Task<IActionResult> GetComments([FromRoute] int postId)
     {
+        await postRepo.GetSingleAsync(postId);
+        
         var commentDtos = commentRepo.GetMany()
-            .Where(post => post.Id == postId)
+            .Where(comment => comment.PostId == postId)
             .AsEnumerable()
             .Select(CommentMapper.ToDto)
             .ToList();
@@ -108,7 +110,7 @@ public class PostsController(
     }
 
 
-    [HttpPut("{postId:int}/votes")]
+    [HttpPost("{postId:int}/votes")]
     public async Task<IActionResult> AddVote(
         [FromRoute] int postId,
         [FromBody] CreatePostVoteDto request
@@ -124,14 +126,10 @@ public class PostsController(
     }
 
     [HttpGet("{postId:int}/votes")]
-    public async Task<IActionResult> getVotes([FromRoute] int postId)
+    public async Task<IActionResult> GetVotes([FromRoute] int postId)
     {
         var votes = await postVoteService.GetVotesAsync(postId);
-
-        var dtos = votes
-            .Select(PostVoteMapper.ToDto)
-            .ToList();
-
-        return Ok(dtos);
+        
+        return Ok(votes);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using DTO.PostVote;
+using Entities;
 using RepositoryContract;
 
 namespace Services;
@@ -7,13 +8,18 @@ public class PostVoteService(
     IPostRepository postRepo,
     IPostVoteRepository postVoteRepo) : IPostVoteService
 {
-    public async Task<List<PostVote>> GetVotesAsync(int postId)
+    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId)
     {
         await postRepo.GetSingleAsync(postId);
 
-        return postVoteRepo.GetMany()
+        var votes = postVoteRepo.GetMany()
             .Where(v => v.PostId == postId)
             .ToList();
+
+        return new PostVoteSummaryDto(
+            votes.Count(v => v.VoteType == VoteType.Like),
+            votes.Count(v => v.VoteType == VoteType.Dislike)
+        );
     }
     
     public async Task SetVoteAsync(int postId, int userId, VoteType voteType)
