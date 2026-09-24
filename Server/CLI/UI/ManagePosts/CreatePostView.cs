@@ -31,7 +31,7 @@ public class CreatePostView(IPostRepository postRepository)
                         : ValidationResult.Success())
         );
 
-        var post = new Post(title, body, userId, subforumId);
+        var post = new Post(body, userId, subforumId, title);
 
         var createdPost = await postRepository.AddAsync(post);
 
