@@ -7,6 +7,15 @@ public class PostVoteService(
     IPostRepository postRepo,
     IPostVoteRepository postVoteRepo) : IPostVoteService
 {
+    public async Task<List<PostVote>> GetVotesAsync(int postId)
+    {
+        await postRepo.GetSingleAsync(postId);
+
+        return postVoteRepo.GetMany()
+            .Where(v => v.PostId == postId)
+            .ToList();
+    }
+    
     public async Task SetVoteAsync(int postId, int userId, VoteType voteType)
     {
         await postRepo.GetSingleAsync(postId);

@@ -10,7 +10,10 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PostsController(IPostRepository postRepo, ICommentRepository commentRepo) : ControllerBase
+public class PostsController(
+    IPostRepository postRepo,
+    ICommentRepository commentRepo,
+    IPostVoteService postVoteService) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
@@ -103,13 +106,12 @@ public class PostsController(IPostRepository postRepo, ICommentRepository commen
 
         return Ok(commentDtos);
     }
-    
-    
+
+
     [HttpPut("{postId:int}/votes")]
     public async Task<IActionResult> AddVote(
         [FromRoute] int postId,
-        [FromBody] PostVoteDto request,
-        [FromServices] IPostVoteService postVoteService
+        [FromBody] CreatePostVoteDto request
     )
     {
         await postVoteService.SetVoteAsync(
@@ -121,6 +123,15 @@ public class PostsController(IPostRepository postRepo, ICommentRepository commen
         return NoContent();
     }
 
+    [HttpGet("{postId:int}/votes")]
+    public async Task<IActionResult> getVotes([FromRoute] int postId)
+    {
+        var votes = await postVoteService.GetVotesAsync(postId);
 
-    //     GET     /posts/{postId}/votes
+        var dtos = votes
+            .Select(PostVoteMapper.ToDto)
+            .ToList();
+
+        return Ok(dtos);
+    }
 }
