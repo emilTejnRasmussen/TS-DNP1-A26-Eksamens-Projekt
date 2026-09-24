@@ -74,4 +74,13 @@ public class PostsController(IPostRepository postRepo) : ControllerBase
 
         return NoContent();
     }
+    
+    
+    //     POST    /posts/{postId}/comments
+    
+    
+    //     GET     /posts/{postId}/comments
+    //
+    //     POST    /posts/{postId}/votes
+    //     GET     /posts/{postId}/votes
 }
