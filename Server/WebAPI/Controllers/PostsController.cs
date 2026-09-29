@@ -4,6 +4,7 @@ using DTO.PostVote;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using Services;
+using Services.Interfaces;
 using WebApi.Mappers;
 
 namespace WebApi.Controllers;

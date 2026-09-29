@@ -1,6 +1,7 @@
 ﻿using DTO.PostVote;
 using Entities;
 using RepositoryContract;
+using Services.Interfaces;
 
 namespace Services;
 

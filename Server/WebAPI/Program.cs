@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using FileRepositories;
 using RepositoryContract;
 using Services;
+using Services.Interfaces;
 using WebApi.ExceptionHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,7 @@ builder.Services.AddScoped<ISubforumRepository, SubforumFileRepository>();
 builder.Services.AddScoped<IUserRepository, UserFileRepository>();
 
 builder.Services.AddScoped<IPostVoteService, PostVoteService>();
+builder.Services.AddScoped<ICommentVoteService, CommentVoteService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

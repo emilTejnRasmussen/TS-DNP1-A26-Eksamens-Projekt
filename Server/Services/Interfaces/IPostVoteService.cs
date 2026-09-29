@@ -1,7 +1,7 @@
 ﻿using DTO.PostVote;
 using Entities;
 
-namespace Services;
+namespace Services.Interfaces;
 
 public interface IPostVoteService
 {
