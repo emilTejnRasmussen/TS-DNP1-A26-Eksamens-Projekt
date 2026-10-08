@@ -3,7 +3,6 @@ using DTO.Posts;
 using DTO.PostVote;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
-using Services;
 using Services.Interfaces;
 using WebApi.Mappers;
 
@@ -38,19 +37,25 @@ public class PostsController(
     [HttpGet]
     public IActionResult GetPosts(
         [FromQuery] string? titleContains = null,
-        [FromQuery] int? userId = null
+        [FromQuery] int? userId = null,
+        [FromQuery] int? subforumId = null
     )
     {
         var posts = postRepo.GetMany();
 
         if (!string.IsNullOrWhiteSpace(titleContains))
         {
-            posts = posts.Where(p => p.Title.Contains(titleContains));
+            posts = posts.Where(p => p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
         }
 
         if (userId.HasValue)
         {
             posts = posts.Where(p => p.UserId == userId.Value);
+        }
+
+        if (subforumId.HasValue)
+        {
+            posts = posts.Where(p => p.SubforumId == subforumId);
         }
 
         var dtos = posts
