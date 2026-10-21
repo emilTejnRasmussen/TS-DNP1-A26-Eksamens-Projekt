@@ -38,6 +38,31 @@ public class CommentsController(
 
         return Ok(CommentMapper.ToDto(comment));
     }
+    
+    [HttpGet]
+    public IActionResult GetComments(
+        [FromQuery] int? userId = null,
+        [FromQuery] int? postId = null)
+    {
+        var comments = commentRepo.GetMany();
+
+        if (userId.HasValue)
+        {
+            comments = comments.Where(c => c.UserId == userId.Value);
+        }
+
+        if (postId.HasValue)
+        {
+            comments = comments.Where(c => c.PostId == postId.Value);
+        }
+
+        var dtos = comments
+            .AsEnumerable()
+            .Select(CommentMapper.ToDto)
+            .ToList();
+
+        return Ok(dtos);
+    }
 
     [HttpPatch("{id:int}")]
     public async Task<IActionResult> UpdateComment([FromRoute] int id, [FromBody] UpdateCommentDto request)
