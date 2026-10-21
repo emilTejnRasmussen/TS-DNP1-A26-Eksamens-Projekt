@@ -26,6 +26,7 @@ builder.Services.AddScoped<ICommentVoteRepository, CommentVoteFileRepository>();
 builder.Services.AddScoped<ISubforumRepository, SubforumFileRepository>();
 builder.Services.AddScoped<IUserRepository, UserFileRepository>();
 
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IPostVoteService, PostVoteService>();
 builder.Services.AddScoped<ICommentVoteService, CommentVoteService>();
 

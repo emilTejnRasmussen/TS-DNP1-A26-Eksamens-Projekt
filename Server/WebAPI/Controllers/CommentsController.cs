@@ -1,10 +1,10 @@
 ﻿using DTO.Comment;
 using DTO.CommentVote;
 using Entities;
+using Mapper;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using Services.Interfaces;
-using WebApi.Mappers;
 
 namespace WebApi.Controllers;
 

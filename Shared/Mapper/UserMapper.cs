@@ -1,7 +1,7 @@
 ﻿using DTO.User;
 using Entities;
 
-namespace WebApi.Mappers;
+namespace Mapper;
 
 public static class UserMapper
 {

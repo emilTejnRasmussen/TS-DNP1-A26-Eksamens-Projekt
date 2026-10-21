@@ -1,7 +1,7 @@
 ﻿using DTO.User;
+using Mapper;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
-using WebApi.Mappers;
 
 namespace WebApi.Controllers;
 

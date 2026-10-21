@@ -10,5 +10,6 @@
   </Folder>
   <Folder Name="/Shared/">
     <Project Path="Shared/DTO/DTO.csproj" />
+    <Project Path="Shared/Mapper/Mapper.csproj" />
   </Folder>
 </Solution>

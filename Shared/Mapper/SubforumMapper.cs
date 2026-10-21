@@ -1,7 +1,7 @@
 using DTO.Subforum;
 using Entities;
 
-namespace WebApi.Mappers;
+namespace Mapper;
 
 public static class SubforumMapper
 {

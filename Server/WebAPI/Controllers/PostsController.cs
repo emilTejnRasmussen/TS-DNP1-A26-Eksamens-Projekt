@@ -1,10 +1,10 @@
 ﻿using DTO.Comment;
 using DTO.Posts;
 using DTO.PostVote;
+using Mapper;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using Services.Interfaces;
-using WebApi.Mappers;
 
 namespace WebApi.Controllers;
 
@@ -13,6 +13,7 @@ namespace WebApi.Controllers;
 public class PostsController(
     IPostRepository postRepo,
     ICommentRepository commentRepo,
+    IPostService postService,
     IPostVoteService postVoteService) : ControllerBase
 {
     [HttpPost]
@@ -20,50 +21,31 @@ public class PostsController(
     {
         var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
 
-        return Created(
-            $"/posts/{created.Id}",
-            PostMapper.ToDto(created)
-        );
+        return Created($"/posts/{created.Id}", PostMapper.ToDto(created));
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetPost([FromRoute] int id)
+    public async Task<IActionResult> GetPost(
+        [FromRoute] int id,
+        [FromQuery] bool includeComments = false)
     {
-        var post = await postRepo.GetSingleAsync(id);
-
-        return Ok(PostMapper.ToDto(post));
+        var post = await postService.GetPostByIdAsync(id, includeComments);
+        return Ok(post);
     }
 
     [HttpGet]
-    public IActionResult GetPosts(
+    public async Task<IActionResult> GetPosts(
         [FromQuery] string? titleContains = null,
         [FromQuery] int? userId = null,
-        [FromQuery] int? subforumId = null
-    )
+        [FromQuery] int? subforumId = null)
     {
-        var posts = postRepo.GetMany();
+        var posts = await postService.GetPostsAsync(
+            titleContains,
+            userId,
+            subforumId
+        );
 
-        if (!string.IsNullOrWhiteSpace(titleContains))
-        {
-            posts = posts.Where(p => p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (userId.HasValue)
-        {
-            posts = posts.Where(p => p.UserId == userId.Value);
-        }
-
-        if (subforumId.HasValue)
-        {
-            posts = posts.Where(p => p.SubforumId == subforumId);
-        }
-
-        var dtos = posts
-            .AsEnumerable()
-            .Select(PostMapper.ToDto)
-            .ToList();
-
-        return Ok(dtos);
+        return Ok(posts);
     }
 
     [HttpPatch("{id:int}")]
@@ -105,7 +87,7 @@ public class PostsController(
     public async Task<IActionResult> GetComments([FromRoute] int postId)
     {
         await postRepo.GetSingleAsync(postId);
-        
+
         var commentDtos = commentRepo.GetMany()
             .Where(comment => comment.PostId == postId)
             .AsEnumerable()
@@ -135,7 +117,7 @@ public class PostsController(
     public async Task<IActionResult> GetVotes([FromRoute] int postId)
     {
         var votes = await postVoteService.GetVotesAsync(postId);
-        
+
         return Ok(votes);
     }
 }

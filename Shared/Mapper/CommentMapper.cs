@@ -1,7 +1,7 @@
 ﻿using DTO.Comment;
 using Entities;
 
-namespace WebApi.Mappers;
+namespace Mapper;
 
 public static class CommentMapper
 {

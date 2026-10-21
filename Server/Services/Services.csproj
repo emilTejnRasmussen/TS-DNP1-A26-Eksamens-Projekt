@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Shared\DTO\DTO.csproj" />
+      <ProjectReference Include="..\..\Shared\Mapper\Mapper.csproj" />
       <ProjectReference Include="..\Entities\Entities.csproj" />
       <ProjectReference Include="..\RepositoryContract\RepositoryContract.csproj" />
     </ItemGroup>
