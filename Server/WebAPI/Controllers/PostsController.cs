@@ -13,12 +13,17 @@ namespace WebApi.Controllers;
 public class PostsController(
     IPostRepository postRepo,
     ICommentRepository commentRepo,
+    IUserRepository userRepo,
+    ISubforumRepository subforumRepo,
     IPostService postService,
     IPostVoteService postVoteService) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
     {
+        await userRepo.GetSingleAsync(request.UserId);
+        await subforumRepo.GetSingleAsync(request.SubforumId);
+        
         var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
 
         return Created($"/posts/{created.Id}", PostMapper.ToDto(created));
