@@ -32,7 +32,7 @@ public class UsersController(IUserRepository userRepo) : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(nameContains))
         {
-            users = users.Where(u => u.Username.Contains(nameContains));
+            users = users.Where(u => u.Username.Contains(nameContains, StringComparison.OrdinalIgnoreCase));
         }
 
         var dtos = users
