@@ -29,7 +29,7 @@ public class CreateSubforumView(ISubforumRepository subforumRepository)
                         : ValidationResult.Success())
         );
 
-        var subforum = new Subforum(name, description, creatorId);
+        var subforum = new Subforum(name, description, creatorId, "", "");
         var createdSubforum = await subforumRepository.AddAsync(subforum);
 
         AnsiConsole.WriteLine();
