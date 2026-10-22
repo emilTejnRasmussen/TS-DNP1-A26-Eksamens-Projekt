@@ -6,4 +6,8 @@ public class Subforum(string name, string description, int creatorId) : IEntity
     public string Name { get; set; } = name;
     public string Description { get; set; } = description;
     public int CreatorId { get; set; } = creatorId;
+    
+    public string Color { get; set; } = "#E78570";
+    
+    public string Symbol { get; set; } = "✳";
 }

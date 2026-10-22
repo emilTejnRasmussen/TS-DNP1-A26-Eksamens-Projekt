@@ -23,7 +23,9 @@ public static class SubforumMapper
             subforum.Name,
             subforum.Description,
             subforum.CreatorId,
-            postCount
+            postCount,
+            subforum.Color,
+            subforum.Symbol
         );
 
         return dto;
