@@ -8,7 +8,6 @@
                 <button type="button"
                         class="color-option @(Color == option ? "selected" : "")"
                         style="background-color: @option"
-                        title="@option"
                         aria-label="Select color @option"
                         aria-pressed="@(Color == option)"
                         @onclick="() => SelectColor(option)">
@@ -22,16 +21,18 @@
     </div>
 
     <div class="picker-section">
-        <label>Community symbol</label>
+        <label>Community icon</label>
 
-        <div class="symbol-options">
-            @foreach (var option in Symbols)
+        <div class="icon-options">
+            @foreach (var icon in Icons)
             {
                 <button type="button"
-                        class="symbol-option @(Symbol == option ? "selected" : "")"
-                        aria-pressed="@(Symbol == option)"
-                        @onclick="() => SelectSymbol(option)">
-                    @option
+                        class="icon-option @(Symbol == icon ? "selected" : "")"
+                        title="@icon"
+                        aria-label="Select @icon icon"
+                        aria-pressed="@(Symbol == icon)"
+                        @onclick="() => SelectSymbol(icon)">
+                    <LucideIcon Name="@icon" Size="22" StrokeWidth="1.8" />
                 </button>
             }
         </div>
@@ -40,9 +41,26 @@
     <div class="preview-label">LIVE PREVIEW</div>
 
     <div class="community-preview" style="--accent: @Color">
-        <span class="preview-symbol">@Symbol</span>
-        <strong>Your community</strong>
-        <p>A little place for your favorite things.</p>
+        <span class="preview-symbol">
+            <LucideIcon Name="@Symbol"
+                        Size="28"
+                        Stroke="var(--accent)"
+                        StrokeWidth="1.8" />
+        </span>
+
+        <div class="preview-body">
+            <h3>@(string.IsNullOrWhiteSpace(Name) ? "Your community" : Name)</h3>
+            <p>
+                @(string.IsNullOrWhiteSpace(Description)
+                    ? "A little place for your favorite things."
+                    : Description)
+            </p>
+        </div>
+
+        <div class="preview-footer">
+            <span>0 posts</span>
+            <span>Explore ↗</span>
+        </div>
     </div>
 </div>
 
@@ -57,12 +75,21 @@
         "#E9A063"
     ];
 
-    private static readonly string[] Symbols =
+    private static readonly string[] Icons =
     [
-        "✳", "✦", "✿", "☼",
-        "♡", "★", "☾", "♣",
-        "◆", "♫", "☁", "⚡"
+        "messages-square", "sprout", "leaf", "sun",
+        "moon-star", "cloud", "coffee", "heart",
+        "palette", "music-2", "book-open", "camera",
+        "gamepad-2", "code-xml", "headphones", "pencil",
+        "flower-2", "users-round", "house", "star",
+        "sparkles", "lightbulb", "compass", "rocket"
     ];
+
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    [Parameter]
+    public string Description { get; set; } = "";
 
     [Parameter]
     public string Color { get; set; } = "#E78570";
@@ -71,20 +98,18 @@
     public EventCallback<string> ColorChanged { get; set; }
 
     [Parameter]
-    public string Symbol { get; set; } = "✳";
+    public string Symbol { get; set; } = "messages-square";
 
     [Parameter]
     public EventCallback<string> SymbolChanged { get; set; }
 
     private async Task SelectColor(string color)
     {
-        Color = color;
         await ColorChanged.InvokeAsync(color);
     }
 
     private async Task SelectSymbol(string symbol)
     {
-        Symbol = symbol;
         await SymbolChanged.InvokeAsync(symbol);
     }
 }

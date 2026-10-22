@@ -41,8 +41,10 @@
             </div>
 
             <CommunityAppearancePicker
+                Name="@name"
+                Description="@description"
                 @bind-Color="color"
-                @bind-Symbol="symbol"/>
+                @bind-Symbol="symbol" />
 
             @if (errorMessage is not null)
             {
@@ -62,7 +64,7 @@
     private bool isSubmitting;
     private string? errorMessage;
     private string color = "#E78570";
-    private string symbol = "✳";
+    private string symbol = "messages-square";
 
     private async Task CreateAsync()
     {
