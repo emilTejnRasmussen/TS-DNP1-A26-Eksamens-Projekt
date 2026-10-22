@@ -136,12 +136,6 @@
     line-height: 1;
 }
 
-.community-number {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 700;
-}
-
 .card-body {
     flex: 1;
     padding: 28px 0 24px;
