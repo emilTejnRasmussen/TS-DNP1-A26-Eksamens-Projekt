@@ -9,12 +9,14 @@ namespace Services;
 public class PostService(
     IPostRepository postRepo,
     ICommentRepository commentRepo,
-    IUserRepository userRepo) : IPostService
+    IUserRepository userRepo,
+    ISubforumRepository subforumRepo) : IPostService
 {
     public async Task<PostDetailsDto> GetPostByIdAsync(int id, bool includeComments = false)
     {
         var post = await postRepo.GetSingleAsync(id);
         var user = await userRepo.GetSingleAsync(post.UserId);
+        var subforum = await subforumRepo.GetSingleAsync(post.SubforumId);
 
         List<CommentDto>? comments = null;
 
@@ -27,7 +29,12 @@ public class PostService(
                 .ToList();
         }
 
-        return PostMapper.ToDetailsDto(post, user.Username, comments);
+        return PostMapper.ToDetailsDto(
+            post,
+            user.Username,
+            subforum.Name,
+            comments
+        );
     }
 
     public async Task<IEnumerable<PostDto>> GetPostsAsync(
@@ -55,14 +62,21 @@ public class PostService(
 
         var dtos = new List<PostDto>();
 
+        var comments = commentRepo.GetMany().ToList();
+
         foreach (var post in posts)
         {
             var user = await userRepo.GetSingleAsync(post.UserId);
-            
-            var commentCount = commentRepo.GetMany()
-                .Count(c => c.PostId == post.Id);
-            
-            dtos.Add(PostMapper.ToDto(post, user.Username, commentCount));
+            var subforum = await subforumRepo.GetSingleAsync(post.SubforumId);
+
+            var commentCount = comments.Count(c => c.PostId == post.Id);
+
+            dtos.Add(PostMapper.ToDto(
+                post,
+                user.Username,
+                commentCount,
+                subforum.Name
+            ));
         }
 
         return dtos;

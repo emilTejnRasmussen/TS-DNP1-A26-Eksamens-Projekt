@@ -1,0 +1,110 @@
+﻿@page "/PostDetails"
+<h3>PostDetails</h3>
+
+@code {
+    
+}@page "/posts/{Id:int}"
+@using DTO.Posts
+@using DTO.PostVote
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+
+<PageTitle>Post | yap.</PageTitle>
+
+<div class="post-details-page">
+    @if (isLoading)
+    {
+        <p class="status-message">Loading conversation...</p>
+    }
+    else if (errorMessage is not null)
+    {
+        <p class="status-message">@errorMessage</p>
+    }
+    else if (post is not null)
+    {
+        <a class="back-link" href="javascript:history.back()">
+            ← Back
+        </a>
+
+        <article class="post-details">
+            <a class="post-author" href="@($"/users/{post.UserId}")">
+                y/@post.Username
+            </a>
+
+            <h1>@post.Title</h1>
+
+            <div class="post-body">@post.Body</div>
+
+            <div class="post-actions">
+                <div class="vote-pill">
+                    <LucideIcon Name="arrow-big-up" Size="20" />
+                    <span>@(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())</span>
+                    <LucideIcon Name="arrow-big-down" Size="20" />
+                </div>
+
+                <div class="comment-pill">
+                    <LucideIcon Name="message-circle" Size="18" />
+                    <span>@(post.Comments?.Count ?? 0)</span>
+                </div>
+            </div>
+        </article>
+
+        <section class="comments-section">
+            <h2>Comments <span>@(post.Comments?.Count ?? 0)</span></h2>
+
+            @if (post.Comments is null || post.Comments.Count == 0)
+            {
+                <p class="status-message">No comments yet. Be the first to join the conversation.</p>
+            }
+            else
+            {
+                <div class="comments-list">
+                    @foreach (var comment in post.Comments)
+                    {
+                        <div class="comment" @key="comment.Id">
+                            <div class="comment-author">User #@comment.UserId</div>
+                            <p>@comment.Body</p>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PostDetailsDto? post;
+    private PostVoteSummaryDto? votes;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        post = null;
+        votes = null;
+
+        try
+        {
+            var postTask = PostService.GetPostAsync(Id, includeComments: true);
+            var votesTask = PostService.GetVotesAsync(Id);
+
+            await Task.WhenAll(postTask, votesTask);
+
+            post = await postTask;
+            votes = await votesTask;
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "We couldn't load this conversation.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

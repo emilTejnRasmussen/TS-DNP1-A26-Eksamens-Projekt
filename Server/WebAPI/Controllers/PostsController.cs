@@ -22,11 +22,15 @@ public class PostsController(
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
     {
         var user = await userRepo.GetSingleAsync(request.UserId);
-        await subforumRepo.GetSingleAsync(request.SubforumId);
+        var subforum = await subforumRepo.GetSingleAsync(request.SubforumId);
         
         var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
 
-        return Created($"/posts/{created.Id}", PostMapper.ToDto(created, user.Username, 0));
+        return Created($"/posts/{created.Id}", PostMapper.ToDto(
+            created, 
+            user.Username, 
+            0, 
+            subforum.Name));
     }
 
     [HttpGet("{id:int}")]
