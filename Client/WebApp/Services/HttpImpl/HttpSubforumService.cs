@@ -5,30 +5,51 @@ namespace WebApp.Services.HttpImpl;
 
 public class HttpSubforumService(HttpClient client) : ISubforumService
 {
-    private readonly HttpClient _client = client;
-    
-    public Task<SubforumDto> AddSubforumAsync(CreateSubforumDto request)
+    public async Task<SubforumDto> AddSubforumAsync(CreateSubforumDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync("subforums", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<SubforumDto>())!;
     }
 
-    public Task<SubforumDto> GetSubforumAsync(int id)
+    public async Task<SubforumDto> GetSubforumAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"subforums/{id}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<SubforumDto>())!;
     }
 
-    public Task<List<SubforumDto>> GetSubforumsAsync(string? nameContains = null)
+    public async Task<List<SubforumDto>> GetSubforumsAsync(string? nameContains = null)
     {
-        throw new NotImplementedException();
+        var url = "subforums";
+
+        if (!string.IsNullOrWhiteSpace(nameContains))
+        {
+            url += $"?nameContains={Uri.EscapeDataString(nameContains)}";
+        }
+
+        var response = await client.GetAsync(url);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<List<SubforumDto>>())!;
     }
 
-    public Task UpdateSubforumAsync(int id, UpdateSubforumDto request)
+    public async Task UpdateSubforumAsync(int id, UpdateSubforumDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PatchAsJsonAsync($"subforums/{id}", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task DeleteSubforumAsync(int id)
+    public async Task DeleteSubforumAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = await client.DeleteAsync($"subforums/{id}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 }
