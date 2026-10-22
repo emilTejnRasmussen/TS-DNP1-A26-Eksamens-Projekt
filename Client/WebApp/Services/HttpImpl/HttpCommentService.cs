@@ -6,40 +6,73 @@ namespace WebApp.Services.HttpImpl;
 
 public class HttpCommentService(HttpClient client) : ICommentService
 {
-    private readonly HttpClient _client = client;
-    
-    public Task<CommentDto> ReplyAsync(int commentId, CreateReplyDto request)
+    public async Task<CommentDto> ReplyAsync(int commentId, CreateReplyDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync($"comments/{commentId}/replies", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<CommentDto>())!;
     }
 
-    public Task<CommentDto> GetCommentAsync(int id)
+    public async Task<CommentDto> GetCommentAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"comments/{id}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<CommentDto>())!;
     }
 
-    public Task<List<CommentDto>> GetCommentsAsync(int? userId = null, int? postId = null)
+    public async Task<List<CommentDto>> GetCommentsAsync(int? userId = null, int? postId = null)
     {
-        throw new NotImplementedException();
+        var query = new List<string>();
+
+        if (userId.HasValue)
+            query.Add($"userId={userId.Value}");
+
+        if (postId.HasValue)
+            query.Add($"postId={postId.Value}");
+
+        var url = "comments";
+
+        if (query.Count > 0)
+            url += "?" + string.Join("&", query);
+
+        var response = await client.GetAsync(url);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<List<CommentDto>>())!;
     }
 
-    public Task UpdateCommentAsync(int id, UpdateCommentDto request)
+    public async Task UpdateCommentAsync(int id, UpdateCommentDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PatchAsJsonAsync($"comments/{id}", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task DeleteCommentAsync(int id)
+    public async Task DeleteCommentAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = await client.DeleteAsync($"comments/{id}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task AddVoteAsync(int commentId, CreateCommentVoteDto request)
+    public async Task AddVoteAsync(int commentId, CreateCommentVoteDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync($"comments/{commentId}/votes", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task<CommentVoteSummaryDto> GetVotesAsync(int commentId)
+    public async Task<CommentVoteSummaryDto> GetVotesAsync(int commentId)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"comments/{commentId}/votes");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<CommentVoteSummaryDto>())!;
     }
 }
