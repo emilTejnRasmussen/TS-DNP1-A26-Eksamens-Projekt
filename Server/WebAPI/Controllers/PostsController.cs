@@ -81,6 +81,7 @@ public class PostsController(
         [FromBody] CreateCommentDto request
     )
     {
+        await userRepo.GetSingleAsync(request.UserId);
         await postRepo.GetSingleAsync(postId);
 
         var created = await commentRepo.AddAsync(CommentMapper.ToEntity(request, postId));
