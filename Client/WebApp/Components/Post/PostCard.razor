@@ -9,9 +9,9 @@
          @onclick="OpenPost">
 
     <div class="post-author">
-        <a href="@($"/users/{Post.UserId}")"
+        <a href="@($"/communities/{Post.SubforumId}")"
            @onclick:stopPropagation="true">
-            y/@Post.Username
+            y/@Post.SubforumName
         </a>
     </div>
 

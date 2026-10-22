@@ -1,9 +1,4 @@
-﻿@page "/PostDetails"
-<h3>PostDetails</h3>
-
-@code {
-    
-}@page "/posts/{Id:int}"
+﻿@page "/posts/{Id:int}"
 @using DTO.Posts
 @using DTO.PostVote
 @using WebApp.Services.Interfaces
@@ -22,14 +17,18 @@
     }
     else if (post is not null)
     {
-        <a class="back-link" href="javascript:history.back()">
-            ← Back
-        </a>
-
         <article class="post-details">
-            <a class="post-author" href="@($"/users/{post.UserId}")">
-                y/@post.Username
-            </a>
+            <div class="post-meta">
+                <a class="community-link"
+                   href="@($"/communities/{post.SubforumId}")">
+                    y/@post.SubforumName
+                </a>
+
+                <a class="author-link"
+                   href="@($"/users/{post.UserId}")">
+                    u/@post.Username
+                </a>
+            </div>
 
             <h1>@post.Title</h1>
 
@@ -38,7 +37,9 @@
             <div class="post-actions">
                 <div class="vote-pill">
                     <LucideIcon Name="arrow-big-up" Size="20" />
-                    <span>@(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())</span>
+                    <span>
+                        @(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())
+                    </span>
                     <LucideIcon Name="arrow-big-down" Size="20" />
                 </div>
 
@@ -50,21 +51,33 @@
         </article>
 
         <section class="comments-section">
-            <h2>Comments <span>@(post.Comments?.Count ?? 0)</span></h2>
+            <div class="comments-heading">
+                <h2>Comments</h2>
+                <span>@(post.Comments?.Count ?? 0)</span>
+            </div>
 
             @if (post.Comments is null || post.Comments.Count == 0)
             {
-                <p class="status-message">No comments yet. Be the first to join the conversation.</p>
+                <div class="empty-comments">
+                    <LucideIcon Name="message-circle" Size="24" />
+                    <p>No comments yet.</p>
+                    <span>Be the first to join the conversation.</span>
+                </div>
             }
             else
             {
                 <div class="comments-list">
                     @foreach (var comment in post.Comments)
                     {
-                        <div class="comment" @key="comment.Id">
-                            <div class="comment-author">User #@comment.UserId</div>
+                        <article class="comment" @key="comment.Id">
+                            <div class="comment-header">
+                                <a href="@($"/users/{comment.UserId}")">
+                                    u/@comment.UserId
+                                </a>
+                            </div>
+
                             <p>@comment.Body</p>
-                        </div>
+                        </article>
                     }
                 </div>
             }
@@ -78,6 +91,7 @@
 
     private PostDetailsDto? post;
     private PostVoteSummaryDto? votes;
+
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -100,7 +114,7 @@
         }
         catch (HttpRequestException)
         {
-            errorMessage = "We couldn't load this conversation.";
+            errorMessage = "We couldn't load this conversation. Please try again.";
         }
         finally
         {
