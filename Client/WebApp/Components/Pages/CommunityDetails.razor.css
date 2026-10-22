@@ -1,0 +1,88 @@
+﻿.community-page {
+    width: 100%;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 32px;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--text);
+}
+
+.posts-section {
+    margin-top: 56px;
+}
+
+.section-heading {
+    margin-bottom: 28px;
+}
+
+.eyebrow {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+}
+
+.section-heading h2 {
+    margin: 12px 0 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.section-heading h2 span {
+    color: var(--coral);
+}
+
+.posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.post-item {
+    padding: 24px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.post-item h3 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: -0.4px;
+}
+
+.empty-state,
+.feedback {
+    padding: 32px;
+    border: 2px solid var(--sage);
+    background: var(--surface);
+}
+
+.empty-state h3,
+.feedback h3 {
+    margin: 0 0 10px;
+}
+
+.empty-state p,
+.feedback p,
+.loading {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+    .posts-section {
+        margin-top: 40px;
+    }
+
+    .section-heading h2 {
+        font-size: 26px;
+    }
+}
