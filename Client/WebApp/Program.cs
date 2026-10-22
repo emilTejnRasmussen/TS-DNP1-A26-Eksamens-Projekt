@@ -1,4 +1,6 @@
 using WebApp.Components;
+using WebApp.Services.HttpImpl;
+using WebApp.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,11 @@ builder.Services.AddScoped(sp => new HttpClient
         BaseAddress = new Uri("http://localhost:5092")
     }
 );
+
+builder.Services.AddScoped<IUserService, HttpUserService>();
+builder.Services.AddScoped<IPostService, HttpPostService>();
+builder.Services.AddScoped<ICommentService, HttpCommentService>();
+builder.Services.AddScoped<ISubforumService, HttpSubforumService>();
 
 var app = builder.Build();
 
