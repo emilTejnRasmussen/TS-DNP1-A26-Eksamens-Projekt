@@ -6,13 +6,14 @@ namespace Mapper;
 
 public static class PostMapper
 {
-    public static PostDto ToDto(Post post)
+    public static PostDto ToDto(Post post, string username)
     {
         return new PostDto(
             post.Id,
             post.Title,
             post.Body,
             post.UserId,
+            username,
             post.SubforumId
         );
     }

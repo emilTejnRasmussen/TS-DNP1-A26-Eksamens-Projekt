@@ -15,7 +15,7 @@ public class PostService(
     {
         var post = await postRepo.GetSingleAsync(id);
         var user = await userRepo.GetSingleAsync(post.UserId);
-        
+
         List<CommentDto>? comments = null;
 
         if (includeComments)
@@ -30,7 +30,7 @@ public class PostService(
         return PostMapper.ToDetailsDto(post, user.Username, comments);
     }
 
-    public Task<IEnumerable<PostDto>> GetPostsAsync(
+    public async Task<IEnumerable<PostDto>> GetPostsAsync(
         string? titleContains = null,
         int? userId = null,
         int? subforumId = null)
@@ -39,7 +39,8 @@ public class PostService(
 
         if (!string.IsNullOrWhiteSpace(titleContains))
         {
-            posts = posts.Where(p => p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
+            posts = posts.Where(p =>
+                p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
         }
 
         if (userId.HasValue)
@@ -52,11 +53,14 @@ public class PostService(
             posts = posts.Where(p => p.SubforumId == subforumId.Value);
         }
 
-        IEnumerable<PostDto> dtos = posts
-            .AsEnumerable()
-            .Select(PostMapper.ToDto)
-            .ToList();
+        var dtos = new List<PostDto>();
 
-        return Task.FromResult(dtos);
+        foreach (var post in posts)
+        {
+            var user = await userRepo.GetSingleAsync(post.UserId);
+            dtos.Add(PostMapper.ToDto(post, user.Username));
+        }
+
+        return dtos;
     }
 }
