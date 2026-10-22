@@ -7,50 +7,97 @@ namespace WebApp.Services.HttpImpl;
 
 public class HttpPostService(HttpClient client) : IPostService
 {
-    private readonly HttpClient _client = client;
-    
-    public Task<PostDto> AddPostAsync(CreatePostDto request)
+    public async Task<PostDto> AddPostAsync(CreatePostDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync("posts", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<PostDto>())!;
     }
 
-    public Task<PostDetailsDto> GetPostAsync(int id, bool includeComments = false)
+    public async Task<PostDetailsDto> GetPostAsync(int id, bool includeComments = false)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"posts/{id}?includeComments={includeComments}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<PostDetailsDto>())!;
     }
 
-    public Task<List<PostDto>> GetPostsAsync(string? titleContains = null, int? userId = null, int? subforumId = null)
+    public async Task<List<PostDto>> GetPostsAsync(
+        string? titleContains = null,
+        int? userId = null,
+        int? subforumId = null)
     {
-        throw new NotImplementedException();
+        var query = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(titleContains))
+            query.Add($"titleContains={Uri.EscapeDataString(titleContains)}");
+
+        if (userId.HasValue)
+            query.Add($"userId={userId.Value}");
+
+        if (subforumId.HasValue)
+            query.Add($"subforumId={subforumId.Value}");
+
+        var url = "posts";
+
+        if (query.Count > 0)
+            url += "?" + string.Join("&", query);
+
+        var response = await client.GetAsync(url);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<List<PostDto>>())!;
     }
 
-    public Task UpdatePostAsync(int id, UpdatePostDto request)
+    public async Task UpdatePostAsync(int id, UpdatePostDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PatchAsJsonAsync($"posts/{id}", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task DeletePostAsync(int id)
+    public async Task DeletePostAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = await client.DeleteAsync($"posts/{id}");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task<CommentDto> AddCommentAsync(int postId, CreateCommentDto request)
+    public async Task<CommentDto> AddCommentAsync(int postId, CreateCommentDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync($"posts/{postId}/comments", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<CommentDto>())!;
     }
 
-    public Task<List<CommentDto>> GetCommentsAsync(int postId)
+    public async Task<List<CommentDto>> GetCommentsAsync(int postId)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"posts/{postId}/comments");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<List<CommentDto>>())!;
     }
 
-    public Task AddVoteAsync(int postId, CreatePostVoteDto request)
+    public async Task AddVoteAsync(int postId, CreatePostVoteDto request)
     {
-        throw new NotImplementedException();
+        var response = await client.PostAsJsonAsync($"posts/{postId}/votes", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public Task<PostVoteSummaryDto> GetVotesAsync(int postId)
+    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId)
     {
-        throw new NotImplementedException();
+        var response = await client.GetAsync($"posts/{postId}/votes");
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+
+        return (await response.Content.ReadFromJsonAsync<PostVoteSummaryDto>())!;
     }
 }
