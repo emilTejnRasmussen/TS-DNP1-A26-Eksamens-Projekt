@@ -219,6 +219,28 @@
     font-size: 11px;
 }
 
+.heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.create-button {
+    padding: 11px 17px;
+    background: var(--text);
+    border: 1px solid var(--text);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 150ms;
+}
+
+.create-button:hover {
+    background: var(--coral);
+}
+
 @media (max-width: 1200px) {
     .community-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -33,12 +33,18 @@
                 <h2>Explore communities<span class="heading-dot">.</span></h2>
             </div>
 
-            @if (subforums is not null)
-            {
-                <span class="community-count">
-                    @subforums.Count communities
-                </span>
-            }
+            <div class="heading-actions">
+                @if (subforums is not null)
+                {
+                    <span class="community-count">
+                        @subforums.Count @(subforums.Count == 1 ? "community" : "communities")
+                    </span>
+                }
+
+                <a href="/communities/create" class="create-button">
+                    + Create community
+                </a>
+            </div>
         </div>
 
         @if (errorMessage is not null)
@@ -125,4 +131,5 @@
             errorMessage = "An unexpected error occurred.";
         }
     }
+
 }

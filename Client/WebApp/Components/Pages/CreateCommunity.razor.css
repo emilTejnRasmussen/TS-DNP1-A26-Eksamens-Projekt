@@ -1,0 +1,124 @@
+﻿.create-page {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 48px;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--text);
+}
+
+.page-heading {
+    margin-bottom: 40px;
+}
+
+.eyebrow {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+}
+
+.page-heading h1 {
+    margin: 18px 0 12px;
+    font-size: clamp(36px, 5vw, 54px);
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.page-heading h1 em {
+    color: var(--coral);
+    font-style: normal;
+}
+
+.page-heading p {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.form-card {
+    padding: 36px;
+    border: 2px solid var(--sage);
+    background: var(--surface);
+}
+
+.form-card h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+}
+
+.form-card > p {
+    margin: 0 0 32px;
+    color: var(--text-muted);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 24px;
+}
+
+.form-field label {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: white;
+    color: var(--text);
+    outline: none;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    border-color: var(--sage);
+}
+
+.form-field textarea {
+    resize: vertical;
+}
+
+.form-card button {
+    width: 100%;
+    padding: 15px 20px;
+    border: 1px solid var(--text);
+    background: var(--text);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form-card button:hover:not(:disabled) {
+    background: var(--coral);
+}
+
+.form-card button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error-message {
+    padding: 12px;
+    border: 1px solid var(--coral);
+    color: #a63d32;
+}
+
+@media (max-width: 600px) {
+    .form-card {
+        padding: 24px;
+    }
+}
