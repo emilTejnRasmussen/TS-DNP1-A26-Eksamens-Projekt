@@ -1,5 +1,68 @@
-﻿<h3>PostCard</h3>
+﻿@using DTO.Posts
+@using DTO.PostVote
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+@inject NavigationManager Navigation
+
+<article class="post-card"
+         style="--accent: @AccentColor"
+         @onclick="OpenPost">
+
+    <div class="post-author">
+        <a href="@($"/users/{Post.UserId}")"
+           @onclick:stopPropagation="true">
+            y/@Post.Username
+        </a>
+    </div>
+
+    <div class="post-content">
+        <h3>
+            <a href="@($"/posts/{Post.Id}")"
+               @onclick:stopPropagation="true">
+                @Post.Title
+            </a>
+        </h3>
+
+        <p>@Post.Body</p>
+    </div>
+
+    <div class="post-footer">
+        <div class="vote-pill" @onclick:stopPropagation="true">
+            <button type="button" disabled aria-label="Upvote">
+                <LucideIcon Name="arrow-big-up" Size="20"/>
+            </button>
+
+            <span>@(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())</span>
+
+            <button type="button" disabled aria-label="Downvote">
+                <LucideIcon Name="arrow-big-down" Size="20"/>
+            </button>
+        </div>
+
+        <a class="comment-pill"
+           href="@($"/posts/{Post.Id}")"
+           @onclick:stopPropagation="true">
+            <LucideIcon Name="message-circle" Size="18"/>
+            <span>@Post.CommentCount</span>
+        </a>
+    </div>
+</article>
 
 @code {
-    
+    [Parameter, EditorRequired] public required PostDto Post { get; set; }
+
+    [Parameter] public string AccentColor { get; set; } = "#E78570";
+
+    private PostVoteSummaryDto? votes;
+
+    private void OpenPost()
+    {
+        Navigation.NavigateTo($"/posts/{Post.Id}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        votes = await PostService.GetVotesAsync(Post.Id);
+    }
+
 }

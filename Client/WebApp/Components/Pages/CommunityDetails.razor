@@ -3,6 +3,7 @@
 @using DTO.Posts
 @using WebApp.Services.Interfaces
 @using WebApp.Components.Community
+@using WebApp.Components.Post
 @inject ISubforumService SubforumService
 @inject IPostService PostService
 
@@ -24,7 +25,7 @@
     }
     else
     {
-        <CommunityHeader Community="community" />
+        <CommunityHeader Community="community"/>
 
         <section class="posts-section">
             <div class="section-heading">
@@ -50,9 +51,9 @@
                 <div class="posts-list">
                     @foreach (var post in posts)
                     {
-                        <article class="post-item" @key="post.Id">
-                            <h3>@post.Title</h3>
-                        </article>
+                        <PostCard Post="post"
+                                  AccentColor="@community.Color"
+                                  @key="post.Id"/>
                     }
                 </div>
             }
@@ -61,7 +62,7 @@
 </div>
 
 @code {
-    [Parameter]
+    [Parameter] 
     public int Id { get; set; }
 
     private SubforumDto? community;
@@ -90,4 +91,5 @@
             errorMessage = "An unexpected error occurred.";
         }
     }
+
 }
