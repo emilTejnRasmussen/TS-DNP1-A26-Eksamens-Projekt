@@ -6,7 +6,7 @@ namespace Mapper;
 
 public static class PostMapper
 {
-    public static PostDto ToDto(Post post, string username)
+    public static PostDto ToDto(Post post, string username, int commentCount)
     {
         return new PostDto(
             post.Id,
@@ -14,7 +14,8 @@ public static class PostMapper
             post.Body,
             post.UserId,
             username,
-            post.SubforumId
+            post.SubforumId,
+            commentCount
         );
     }
 

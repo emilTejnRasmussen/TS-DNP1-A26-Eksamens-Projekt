@@ -58,7 +58,11 @@ public class PostService(
         foreach (var post in posts)
         {
             var user = await userRepo.GetSingleAsync(post.UserId);
-            dtos.Add(PostMapper.ToDto(post, user.Username));
+            
+            var commentCount = commentRepo.GetMany()
+                .Count(c => c.PostId == post.Id);
+            
+            dtos.Add(PostMapper.ToDto(post, user.Username, commentCount));
         }
 
         return dtos;

@@ -26,7 +26,7 @@ public class PostsController(
         
         var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
 
-        return Created($"/posts/{created.Id}", PostMapper.ToDto(created, user.Username));
+        return Created($"/posts/{created.Id}", PostMapper.ToDto(created, user.Username, 0));
     }
 
     [HttpGet("{id:int}")]
