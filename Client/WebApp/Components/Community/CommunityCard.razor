@@ -1,0 +1,27 @@
+﻿@using DTO.Subforum
+
+<article class="community-card" style="--accent: @Community.Color">
+    <div class="card-top">
+        <span class="community-icon">@Community.Symbol</span>
+    </div>
+
+    <div class="card-body">
+        <h3>@Community.Name</h3>
+        <p>@Community.Description</p>
+    </div>
+
+    <div class="card-bottom">
+        <span>
+            @Community.PostCount @(Community.PostCount == 1 ? "post" : "posts")
+        </span>
+
+        <a href="@($"/communities/{Community.Id}")">
+            Explore <span aria-hidden="true">↗</span>
+        </a>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public required SubforumDto Community { get; set; }
+}

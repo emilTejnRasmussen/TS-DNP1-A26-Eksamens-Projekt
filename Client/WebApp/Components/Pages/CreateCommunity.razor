@@ -1,6 +1,7 @@
 ﻿@page "/communities/create"
 @using DTO.Subforum
 @using WebApp.Services.Interfaces
+@using WebApp.Components.Community
 @inject ISubforumService SubforumService
 @inject NavigationManager Navigation
 
@@ -26,7 +27,7 @@
                        @bind="name"
                        maxlength="50"
                        required
-                       placeholder="e.g. programming" />
+                       placeholder="e.g. programming"/>
             </div>
 
             <div class="form-field">
@@ -38,6 +39,10 @@
                           placeholder="What's this community about?">
                 </textarea>
             </div>
+
+            <CommunityAppearancePicker
+                @bind-Color="color"
+                @bind-Symbol="symbol"/>
 
             @if (errorMessage is not null)
             {
@@ -56,6 +61,8 @@
     private string description = "";
     private bool isSubmitting;
     private string? errorMessage;
+    private string color = "#E78570";
+    private string symbol = "✳";
 
     private async Task CreateAsync()
     {
@@ -71,7 +78,9 @@
             var request = new CreateSubforumDto(
                 name.Trim(),
                 description.Trim(),
-                1
+                1,
+                color,
+                symbol
             );
 
             await SubforumService.AddSubforumAsync(request);
@@ -87,4 +96,5 @@
             isSubmitting = false;
         }
     }
+
 }

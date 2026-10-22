@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using DTO.Subforum
 @using WebApp.Services.Interfaces
+@using WebApp.Components.Community
 @inject ISubforumService SubforumService
 
 <PageTitle>Discover | yap.</PageTitle>
@@ -26,7 +27,7 @@
         </div>
     </section>
 
-    <section class="communities">
+    <section id="communities" class="communities">
         <div class="section-heading">
             <div>
                 <span class="eyebrow">A PLACE FOR EVERY INTEREST</span>
@@ -69,30 +70,9 @@
         else
         {
             <div class="community-grid">
-                @for (var i = 0; i < subforums.Count; i++)
+                @foreach (var subforum in subforums)
                 {
-                    var subforum = subforums[i];
-                    var colorIndex = i % 6;
-
-                    <article class="community-card color-@colorIndex">
-                        <div class="card-top">
-                            <span class="community-icon">✳</span>
-                        </div>
-
-                        <div class="card-body">
-                            <h3>@subforum.Name</h3>
-                            <p>@subforum.Description</p>
-                        </div>
-
-                        <div class="card-bottom">
-                            <span>@subforum.PostCount posts</span>
-
-                            <a href="@($"/posts?subforumId={subforum.Id}")"
-                               aria-label="@($"Browse posts in {subforum.Name}")">
-                                Explore <span aria-hidden="true">↗</span>
-                            </a>
-                        </div>
-                    </article>
+                    <CommunityCard Community="subforum" @key="subforum.Id" />
                 }
             </div>
         }
@@ -131,5 +111,4 @@
             errorMessage = "An unexpected error occurred.";
         }
     }
-
 }

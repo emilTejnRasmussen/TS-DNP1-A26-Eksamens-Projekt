@@ -1,0 +1,90 @@
+﻿<div class="appearance-picker">
+    <div class="picker-section">
+        <label>Community color</label>
+
+        <div class="color-options">
+            @foreach (var option in Colors)
+            {
+                <button type="button"
+                        class="color-option @(Color == option ? "selected" : "")"
+                        style="background-color: @option"
+                        title="@option"
+                        aria-label="Select color @option"
+                        aria-pressed="@(Color == option)"
+                        @onclick="() => SelectColor(option)">
+                    @if (Color == option)
+                    {
+                        <span>✓</span>
+                    }
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="picker-section">
+        <label>Community symbol</label>
+
+        <div class="symbol-options">
+            @foreach (var option in Symbols)
+            {
+                <button type="button"
+                        class="symbol-option @(Symbol == option ? "selected" : "")"
+                        aria-pressed="@(Symbol == option)"
+                        @onclick="() => SelectSymbol(option)">
+                    @option
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="preview-label">LIVE PREVIEW</div>
+
+    <div class="community-preview" style="--accent: @Color">
+        <span class="preview-symbol">@Symbol</span>
+        <strong>Your community</strong>
+        <p>A little place for your favorite things.</p>
+    </div>
+</div>
+
+@code {
+    private static readonly string[] Colors =
+    [
+        "#E78570",
+        "#94B69A",
+        "#91B6D8",
+        "#E2BE65",
+        "#DDA4B8",
+        "#E9A063"
+    ];
+
+    private static readonly string[] Symbols =
+    [
+        "✳", "✦", "✿", "☼",
+        "♡", "★", "☾", "♣",
+        "◆", "♫", "☁", "⚡"
+    ];
+
+    [Parameter]
+    public string Color { get; set; } = "#E78570";
+
+    [Parameter]
+    public EventCallback<string> ColorChanged { get; set; }
+
+    [Parameter]
+    public string Symbol { get; set; } = "✳";
+
+    [Parameter]
+    public EventCallback<string> SymbolChanged { get; set; }
+
+    private async Task SelectColor(string color)
+    {
+        Color = color;
+        await ColorChanged.InvokeAsync(color);
+    }
+
+    private async Task SelectSymbol(string symbol)
+    {
+        Symbol = symbol;
+        await SymbolChanged.InvokeAsync(symbol);
+    }
+}
