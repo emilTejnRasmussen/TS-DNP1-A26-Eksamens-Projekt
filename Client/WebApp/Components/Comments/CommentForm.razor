@@ -85,11 +85,7 @@
 
         try
         {
-            var dto = new CreateCommentDto(
-                body.Trim(),
-                UserId,
-                ParentCommentId
-            );
+            var dto = new CreateCommentDto(body.Trim(), ParentCommentId);
 
             await PostService.AddCommentAsync(PostId, dto);
 

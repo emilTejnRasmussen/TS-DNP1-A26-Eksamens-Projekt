@@ -79,8 +79,7 @@
 
         try
         {
-            // TODO User logged in  user userid instead
-            var dto = new CreatePostVoteDto(1, voteType);
+            var dto = new CreatePostVoteDto(voteType);
 
             await PostService.AddVoteAsync(Post.Id, dto);
 

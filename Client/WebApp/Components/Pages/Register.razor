@@ -1,0 +1,113 @@
+﻿@page "/register"
+@using DTO.Auth
+@using WebApp.Services.Interfaces
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Join yap.</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-heading">
+        <span class="auth-eyebrow">THERE'S ROOM FOR YOU ✳</span>
+        <h1>Come on in<span>.</span></h1>
+        <p>A little place for big conversations. Make yourself at home.</p>
+    </div>
+
+    <div class="auth-card">
+        <form @onsubmit="RegisterAsync" @onsubmit:preventDefault>
+            <div class="auth-field">
+                <label for="register-username">Username</label>
+                <input id="register-username"
+                       type="text"
+                       autocomplete="username"
+                       placeholder="Pick a username"
+                       @bind="username"
+                       required
+                       disabled="@isSubmitting" />
+            </div>
+
+            <div class="auth-field">
+                <label for="register-password">Password</label>
+                <input id="register-password"
+                       type="password"
+                       autocomplete="new-password"
+                       placeholder="Create a password"
+                       @bind="password"
+                       required
+                       minlength="8"
+                       disabled="@isSubmitting" />
+            </div>
+
+            <div class="auth-field">
+                <label for="register-confirm">Confirm password</label>
+                <input id="register-confirm"
+                       type="password"
+                       autocomplete="new-password"
+                       placeholder="One more time"
+                       @bind="confirmPassword"
+                       required
+                       disabled="@isSubmitting" />
+            </div>
+
+            @if (errorMessage is not null)
+            {
+                <p class="auth-error" role="alert">@errorMessage</p>
+            }
+
+            <button class="auth-submit"
+                    type="submit"
+                    disabled="@isSubmitting">
+                @(isSubmitting ? "Creating account..." : "Create account")
+                <LucideIcon Name="arrow-right" Size="17" />
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already part of yap.?
+            <a href="/login">Log in</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string confirmPassword = "";
+    private string? errorMessage;
+    private bool isSubmitting;
+
+    private async Task RegisterAsync()
+    {
+        if (isSubmitting)
+            return;
+
+        errorMessage = null;
+
+        if (password != confirmPassword)
+        {
+            errorMessage = "Passwords don't match.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            await AuthService.RegisterAsync(
+                new RegisterRequest(username.Trim(), password)
+            );
+
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.StatusCode == System.Net.HttpStatusCode.Conflict
+                ? "That username is already taken."
+                : "Couldn't create your account. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

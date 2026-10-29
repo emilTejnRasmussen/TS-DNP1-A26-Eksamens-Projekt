@@ -122,7 +122,7 @@
 
         try
         {
-            var dto = new CreateCommentVoteDto(UserId, voteType);
+            var dto = new CreateCommentVoteDto(voteType);
 
             await CommentService.AddVoteAsync(Comment.Id, dto);
 

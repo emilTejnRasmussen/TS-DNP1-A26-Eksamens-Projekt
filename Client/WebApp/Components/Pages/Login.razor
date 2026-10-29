@@ -1,0 +1,93 @@
+﻿@page "/login"
+@using DTO.Auth
+@using WebApp.Services.Interfaces
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Log in | yap.</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-heading">
+        <span class="auth-eyebrow">WELCOME BACK ✳</span>
+        <h1>Hey, you<span>.</span></h1>
+        <p>Good to see you again. Let's get you back into the conversation.</p>
+    </div>
+
+    <div class="auth-card">
+        <form @onsubmit="LoginAsync" @onsubmit:preventDefault>
+            <div class="auth-field">
+                <label for="login-username">Username</label>
+                <input id="login-username"
+                       type="text"
+                       autocomplete="username"
+                       placeholder="Your username"
+                       @bind="username"
+                       required
+                       disabled="@isSubmitting" />
+            </div>
+
+            <div class="auth-field">
+                <label for="login-password">Password</label>
+                <input id="login-password"
+                       type="password"
+                       autocomplete="current-password"
+                       placeholder="Your password"
+                       @bind="password"
+                       required
+                       disabled="@isSubmitting" />
+            </div>
+
+            @if (errorMessage is not null)
+            {
+                <p class="auth-error" role="alert">@errorMessage</p>
+            }
+
+            <button class="auth-submit"
+                    type="submit"
+                    disabled="@isSubmitting">
+                @(isSubmitting ? "Logging in..." : "Log in")
+                <LucideIcon Name="arrow-right" Size="17" />
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            New around here?
+            <a href="/register">Create an account</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string? errorMessage;
+    private bool isSubmitting;
+
+    private async Task LoginAsync()
+    {
+        if (isSubmitting)
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            await AuthService.LoginAsync(
+                new LoginRequest(username.Trim(), password)
+            );
+
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? "Incorrect username or password."
+                : "Couldn't log you in. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
