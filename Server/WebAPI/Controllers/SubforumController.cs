@@ -1,8 +1,6 @@
 ﻿using DTO.Subforum;
-using Mapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RepositoryContract;
 using Services.Interfaces;
 using WebApi.Authentication;
 
