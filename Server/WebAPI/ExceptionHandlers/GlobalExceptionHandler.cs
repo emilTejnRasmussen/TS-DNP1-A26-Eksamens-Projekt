@@ -18,6 +18,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             UsernameAlreadyExistsException => StatusCodes.Status409Conflict,
             InvalidCredentialsException => StatusCodes.Status401Unauthorized,
             InvalidCurrentPasswordException => StatusCodes.Status400BadRequest,
+            ForbiddenOperationException => StatusCodes.Status403Forbidden,
             _ => 0
         };
 

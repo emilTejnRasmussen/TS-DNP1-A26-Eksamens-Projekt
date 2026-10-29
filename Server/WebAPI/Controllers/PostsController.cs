@@ -1,10 +1,8 @@
 ﻿using DTO.Comment;
 using DTO.Posts;
 using DTO.PostVote;
-using Mapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RepositoryContract;
 using Services.Interfaces;
 using WebApi.Authentication;
 
@@ -13,21 +11,10 @@ namespace WebApi.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class PostsController(
-    IPostRepository postRepo,
-    ICommentRepository commentRepo,
-    IUserRepository userRepo,
+    ICommentService commentService,
     IPostService postService,
     IPostVoteService postVoteService) : ControllerBase
 {
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
-    {
-        var response = await postService.CreatePostAsync(User.GetUserId(), request);
-        
-        return Created($"/posts/{response.Id}", response);
-    }
-
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetPost(
         [FromRoute] int id,
@@ -52,63 +39,55 @@ public class PostsController(
         return Ok(posts);
     }
 
-    [HttpPatch("{id:int}")]
-    public async Task<IActionResult> UpdatePost([FromRoute] int id, [FromBody] UpdatePostDto request)
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
     {
-        var postToUpdate = await postRepo.GetSingleAsync(id);
+        var response = await postService.CreatePostAsync(User.GetUserId(), request);
 
-        postToUpdate.Title = request.Title;
-        postToUpdate.Body = request.Body;
+        return Created($"/posts/{response.Id}", response);
+    }
 
-        await postRepo.UpdateAsync(postToUpdate);
+
+    [Authorize]
+    [HttpPatch("{postId:int}")]
+    public async Task<IActionResult> UpdatePost([FromRoute] int postId, [FromBody] UpdatePostDto request)
+    {
+        await postService.UpdatePostAsync(User.GetUserId(), postId, request);
 
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeletePost([FromRoute] int id)
+    [Authorize]
+    [HttpDelete("{postId:int}")]
+    public async Task<IActionResult> DeletePost([FromRoute] int postId)
     {
-        await postRepo.DeleteAsync(id);
+        await postService.DeleteAsync(User.GetUserId(), postId);
 
         return NoContent();
     }
 
-
+    [Authorize]
     [HttpPost("{postId:int}/comments")]
     public async Task<IActionResult> AddComment(
         [FromRoute] int postId,
         [FromBody] CreateCommentDto request
     )
     {
-        var user = await userRepo.GetSingleAsync(request.UserId);
-        await postRepo.GetSingleAsync(postId);
+        var response = await commentService.CreateCommentAsync(User.GetUserId(), postId, request);
 
-        var created = await commentRepo.AddAsync(CommentMapper.ToEntity(request, postId));
-
-        return Created($"/comments/{created.Id}", CommentMapper.ToDto(created, user.Username));
+        return Created($"/comments/{response.Id}", response);
     }
 
     [HttpGet("{postId:int}/comments")]
     public async Task<IActionResult> GetComments([FromRoute] int postId)
     {
-        await postRepo.GetSingleAsync(postId);
+        var response = await commentService.GetCommentsForPostAsync(postId);
 
-        var comments = commentRepo.GetMany()
-            .Where(comment => comment.PostId == postId)
-            .OrderByDescending(c => c.CreatedAt);
-
-        var commentDtos = new List<CommentDto>();
-
-        foreach (var comment in comments)
-        {
-            var user = await userRepo.GetSingleAsync(comment.UserId);
-            commentDtos.Add(CommentMapper.ToDto(comment, user.Username));
-        }
-
-        return Ok(commentDtos);
+        return Ok(response);
     }
-
-
+    
+    [Authorize]
     [HttpPost("{postId:int}/votes")]
     public async Task<IActionResult> AddVote(
         [FromRoute] int postId,
@@ -117,7 +96,7 @@ public class PostsController(
     {
         await postVoteService.SetVoteAsync(
             postId,
-            request.UserId,
+            User.GetUserId(),
             request.VoteType
         );
 
@@ -125,11 +104,15 @@ public class PostsController(
     }
 
     [HttpGet("{postId:int}/votes")]
-    public async Task<IActionResult> GetVotes(
-        [FromRoute] int postId,
-        [FromQuery] int? userId = null)
+    public async Task<IActionResult> GetVotes([FromRoute] int postId)
+    
     {
+        int? userId = User.Identity?.IsAuthenticated == true
+            ? User.GetUserId()
+            : null;
+        
         var votes = await postVoteService.GetVotesAsync(postId, userId);
+        
         return Ok(votes);
     }
 }

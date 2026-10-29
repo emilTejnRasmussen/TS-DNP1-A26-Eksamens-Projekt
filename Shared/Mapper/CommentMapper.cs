@@ -18,11 +18,11 @@ public static class CommentMapper
         );
     }
 
-    public static Comment ToEntity(CreateCommentDto dto, int postId)
+    public static Comment ToEntity(CreateCommentDto dto, int postId, int userId)
     {
         return new Comment(
             dto.Body,
-            dto.UserId,
+            userId,
             postId,
             dto.ParentCommentId
         );
