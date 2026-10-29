@@ -1,0 +1,59 @@
+﻿@using DTO.Comment
+
+<div class="comment-thread">
+    <CommentCard
+        Comment="@Comment"
+        UserId="@UserId"
+        OnCommentAdded="@OnCommentAdded"
+        HasReplies="@(Replies.Count > 0)"
+        IsCollapsed="@isCollapsed"
+        OnToggleReplies="ToggleThread" />
+
+    @if (!isCollapsed && Replies.Count > 0)
+    {
+        <div class="thread-replies @(Depth >= MaxDepth ? "no-indent" : "")">
+            @foreach (var reply in Replies)
+            {
+                <CommentThread
+                    @key="reply.Id"
+                    Comment="@reply"
+                    AllComments="@AllComments"
+                    UserId="@UserId"
+                    OnCommentAdded="@OnCommentAdded"
+                    Depth="@(Depth + 1)" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required CommentDto Comment { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<CommentDto> AllComments { get; set; }
+
+    [Parameter, EditorRequired]
+    public int UserId { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentAdded { get; set; }
+
+    [Parameter]
+    public int Depth { get; set; }
+
+    private const int MaxDepth = 3;
+
+    private bool isCollapsed = false;
+
+    private List<CommentDto> Replies =>
+        AllComments
+            .Where(c => c.ParentCommentId == Comment.Id)
+            .OrderBy(c => c.CreatedAt)
+            .ToList();
+
+    private void ToggleThread()
+    {
+        isCollapsed = !isCollapsed;
+    }
+}

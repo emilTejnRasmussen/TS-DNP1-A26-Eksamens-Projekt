@@ -1,4 +1,5 @@
-﻿.comment-form {
+﻿
+.comment-form {
     padding: 24px 26px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -56,9 +57,7 @@
     justify-content: center;
     gap: 8px;
     padding: 10px 16px;
-    background: var(--coral);
     border: none;
-    color: white;
     font: inherit;
     font-size: 12px;
     font-weight: 700;
@@ -66,7 +65,12 @@
     transition: opacity 0.15s ease;
 }
 
-.form-footer button:hover:not(:disabled) {
+.submit-button {
+    background: var(--coral);
+    color: white;
+}
+
+.submit-button:hover:not(:disabled) {
     opacity: 0.85;
 }
 
@@ -75,19 +79,40 @@
     cursor: not-allowed;
 }
 
+.cancel-button {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.cancel-button:hover:not(:disabled) {
+    color: var(--text);
+}
+
 .form-error {
     margin: 12px 0 0;
     color: #c04b42;
     font-size: 12px;
 }
 
-.comments-section .comments-list,
-.comments-section .empty-comments {
-    margin-top: 20px;
+/* Compact reply form */
+
+.comment-form.compact {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.comment-form.compact textarea {
+    min-height: 85px;
+}
+
+.comment-form.compact .form-footer {
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 @media (max-width: 600px) {
-    .comment-form {
+    .comment-form:not(.compact) {
         padding: 20px;
     }
 

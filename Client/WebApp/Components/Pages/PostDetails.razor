@@ -73,12 +73,21 @@
             }
             else
             {
+                
                 <div class="comments-list">
-                    @foreach (var comment in post.Comments)
+                    @foreach (var comment in post.Comments
+                                  .Where(c => c.ParentCommentId is null)
+                                  .OrderByDescending(c => c.CreatedAt))
                     {
-                        <CommentCard @key="comment.Id" Comment="comment"/>
+                        <CommentThread
+                            @key="comment.Id"
+                            Comment="@comment"
+                            AllComments="@post.Comments"
+                            UserId="1"
+                            OnCommentAdded="RefreshCommentsAsync" />
                     }
                 </div>
+
             }
         </section>
     }
@@ -87,7 +96,7 @@
 @code {
     [Parameter] public int Id { get; set; }
 
-    private PostDetailsDto? post;
+    private PostDetailsDto?  post;
     private PostVoteSummaryDto? votes;
 
     private bool isLoading = true;
