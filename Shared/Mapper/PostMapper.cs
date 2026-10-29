@@ -38,12 +38,12 @@ public static class PostMapper
         );
     }
 
-    public static Post ToEntity(CreatePostDto dto)
+    public static Post ToEntity(CreatePostDto dto, int userId)
     {
         return new Post(
             dto.Title,
             dto.Body,
-            dto.UserId,
+            userId,
             dto.SubforumId
         );
     }

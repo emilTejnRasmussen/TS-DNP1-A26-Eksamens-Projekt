@@ -14,4 +14,6 @@ public interface IPostService
         int? userId = null,
         int? subforumId = null
     );
+
+    Task<PostDto> CreatePostAsync(int userId, CreatePostDto request);
 }

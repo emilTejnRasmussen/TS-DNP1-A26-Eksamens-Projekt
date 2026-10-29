@@ -27,7 +27,7 @@ public class PostService(
                 subforum.Name,
                 comments
             );
-        
+
         var postComments = commentRepo.GetMany()
             .Where(c => c.PostId == id)
             .OrderByDescending(c => c.CreatedAt);
@@ -91,5 +91,20 @@ public class PostService(
         }
 
         return dtos;
+    }
+
+    public async Task<PostDto> CreatePostAsync(int userId, CreatePostDto request)
+    {
+        var user = await userRepo.GetSingleAsync(userId);
+        var subforum = await subforumRepo.GetSingleAsync(request.SubforumId);
+
+        var createdPost = await postRepo.AddAsync(PostMapper.ToEntity(request, userId));
+
+        return PostMapper.ToDto(
+            createdPost,
+            user.Username,
+            0,
+            subforum.Name
+        );
     }
 }

@@ -2,9 +2,11 @@
 using DTO.Posts;
 using DTO.PostVote;
 using Mapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
 using Services.Interfaces;
+using WebApi.Authentication;
 
 namespace WebApi.Controllers;
 
@@ -14,23 +16,16 @@ public class PostsController(
     IPostRepository postRepo,
     ICommentRepository commentRepo,
     IUserRepository userRepo,
-    ISubforumRepository subforumRepo,
     IPostService postService,
     IPostVoteService postVoteService) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
     {
-        var user = await userRepo.GetSingleAsync(request.UserId);
-        var subforum = await subforumRepo.GetSingleAsync(request.SubforumId);
-
-        var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
-
-        return Created($"/posts/{created.Id}", PostMapper.ToDto(
-            created,
-            user.Username,
-            0,
-            subforum.Name));
+        var response = await postService.CreatePostAsync(User.GetUserId(), request);
+        
+        return Created($"/posts/{response.Id}", response);
     }
 
     [HttpGet("{id:int}")]
