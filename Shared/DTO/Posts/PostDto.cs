@@ -5,5 +5,8 @@ public record PostDto(
     string Title,
     string Body,
     int UserId,
-    int SubforumId
+    string Username,
+    int SubforumId,
+    string SubforumName,
+    int CommentCount
 );

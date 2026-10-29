@@ -10,7 +10,9 @@ public static class SubforumMapper
         var subforum = new Subforum(
             dto.Name,
             dto.Description,
-            dto.CreatorId
+            dto.CreatorId,
+            dto.Color,
+            dto.Symbol
         );
 
         return subforum;
@@ -23,7 +25,9 @@ public static class SubforumMapper
             subforum.Name,
             subforum.Description,
             subforum.CreatorId,
-            postCount
+            postCount,
+            subforum.Color,
+            subforum.Symbol
         );
 
         return dto;

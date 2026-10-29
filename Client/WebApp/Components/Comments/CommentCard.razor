@@ -1,0 +1,136 @@
+﻿@using WebApp.Components.Voting
+@using DTO.Comment
+@using WebApp.Helpers
+@using DTO.CommentVote
+@using Entities
+@using WebApp.Services.Interfaces
+@inject ICommentService CommentService
+
+<article class="comment">
+    <div class="comment-header">
+        <a href="@($"/users/{Comment.UserId}")">
+            u/@Comment.Username
+        </a>
+
+        <span class="comment-time"
+              title="@Comment.CreatedAt.ToString("dd MMM yyyy, HH:mm 'UTC'")">
+            @TimeFormatter.TimeAgo(Comment.CreatedAt)
+        </span>
+    </div>
+
+    <p class="comment-body">@Comment.Body</p>
+
+    <div class="comment-actions">
+        @if (votes is not null)
+        {
+            <VotePill
+                Likes="@votes.Likes"
+                Dislikes="@votes.Dislikes"
+                UserVote="@votes.UserVote"
+                Compact="true"
+                Disabled="@isVoting"
+                OnUpvote="() => VoteAsync(VoteType.Like)"
+                OnDownvote="() => VoteAsync(VoteType.Dislike)" />
+        }
+
+        <button type="button"
+                class="reply-button"
+                @onclick="ToggleReply">
+            <LucideIcon Name="message-circle" Size="15"/>
+            Reply
+        </button>
+
+        @if (HasReplies)
+        {
+            <button type="button"
+                    class="collapse-button"
+                    title="@(IsCollapsed ? "Expand replies" : "Collapse replies")"
+                    aria-label="@(IsCollapsed ? "Expand replies" : "Collapse replies")"
+                    aria-expanded="@(!IsCollapsed)"
+                    @onclick="() => OnToggleReplies.InvokeAsync()">
+                <LucideIcon
+                    Name="@(IsCollapsed ? "chevron-right" : "chevron-down")"
+                    Size="16"/>
+            </button>
+        }
+    </div>
+
+    @if (isReplying)
+    {
+        <div class="reply-form">
+            <CommentForm
+                PostId="@Comment.PostId"
+                UserId="@UserId"
+                ParentCommentId="@Comment.Id"
+                OnCommentAdded="HandleReplyAddedAsync"
+                OnCancel="CloseReply"/>
+        </div>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] 
+    public required CommentDto Comment { get; set; }
+
+    [Parameter, EditorRequired] 
+    public int UserId { get; set; }
+
+    [Parameter] 
+    public EventCallback OnCommentAdded { get; set; }
+
+    [Parameter] 
+    public bool HasReplies { get; set; }
+
+    [Parameter] 
+    public bool IsCollapsed { get; set; }
+
+    [Parameter] 
+    public EventCallback OnToggleReplies { get; set; }
+
+    private bool isReplying;
+
+    private void ToggleReply()
+    {
+        isReplying = !isReplying;
+    }
+
+    private void CloseReply()
+    {
+        isReplying = false;
+    }
+
+    private async Task HandleReplyAddedAsync()
+    {
+        isReplying = false;
+        await OnCommentAdded.InvokeAsync();
+    }
+
+    private CommentVoteSummaryDto? votes;
+    private bool isVoting;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
+    }
+
+    private async Task VoteAsync(VoteType voteType)
+    {
+        if (isVoting)
+            return;
+
+        isVoting = true;
+
+        try
+        {
+            var dto = new CreateCommentVoteDto(UserId, voteType);
+
+            await CommentService.AddVoteAsync(Comment.Id, dto);
+
+            votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
+        }
+        finally
+        {
+            isVoting = false;
+        }
+    }
+}

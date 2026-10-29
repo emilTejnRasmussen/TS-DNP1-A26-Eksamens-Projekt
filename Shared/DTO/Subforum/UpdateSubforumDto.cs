@@ -1,3 +1,8 @@
 ﻿namespace DTO.Subforum;
 
-public record UpdateSubforumDto(string Name, string Description);
+public record UpdateSubforumDto(
+    string Name,
+    string Description,
+    string Color,
+    string Symbol
+);

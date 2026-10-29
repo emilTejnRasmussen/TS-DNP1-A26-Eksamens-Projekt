@@ -1,0 +1,39 @@
+﻿@using DTO.Subforum
+@inject NavigationManager Navigation
+
+<article class="community-card" style="--accent: @Community.Color" @onclick="OpenCommunity">
+    <div class="card-top">
+        <span class="community-icon">
+            <LucideIcon Name="@Community.Symbol"
+                        Size="28"
+                        Stroke="var(--accent)"
+                        StrokeWidth="1.8" />
+        </span>
+    </div>
+
+    <div class="card-body">
+        <h3>@Community.Name</h3>
+        <p>@Community.Description</p>
+    </div>
+
+    <div class="card-bottom">
+        <span>
+            @Community.PostCount @(Community.PostCount == 1 ? "post" : "posts")
+        </span>
+
+        <a href="@($"/communities/{Community.Id}")"
+           @onclick:stopPropagation="true">
+            Explore <span aria-hidden="true">↗</span>
+        </a>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public required SubforumDto Community { get; set; }
+    
+    private void OpenCommunity()
+    {
+        Navigation.NavigateTo($"/communities/{Community.Id}");
+    }
+}

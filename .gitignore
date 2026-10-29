@@ -1,7 +1,33 @@
+# JetBrains Rider
 .idea/
+*.iml
+_ReSharper.Caches/
+*.DotSettings.user
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Build output
+**/bin/
+**/obj/
+packages/
+TestResults/
+
+# Local data
 data/
-bin/
-obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
+
+# Logs
+*.log
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,35 @@
+﻿@using DTO.Subforum
+
+<section class="community-header" style="--accent: @Community.Color">
+    <div class="header-top">
+        <div class="community-icon">
+            <LucideIcon Name="@Community.Symbol"
+                        Size="32"
+                        Stroke="var(--accent)"
+                        StrokeWidth="1.8" />
+        </div>
+
+        <span class="community-label">YOUR LITTLE CORNER OF YAP.</span>
+    </div>
+
+    <div class="header-content">
+        <h1>@Community.Name<span>.</span></h1>
+        <p>@Community.Description</p>
+    </div>
+
+    <div class="header-bottom">
+        <span class="post-count">
+            @Community.PostCount @(Community.PostCount == 1 ? "post" : "posts")
+        </span>
+
+        <a href="@($"/communities/{Community.Id}/posts/create")"
+           class="create-post">
+            + Create post
+        </a>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public required SubforumDto Community { get; set; }
+}

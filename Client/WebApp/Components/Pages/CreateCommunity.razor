@@ -1,0 +1,102 @@
+﻿@page "/communities/create"
+@using DTO.Subforum
+@using WebApp.Services.Interfaces
+@using WebApp.Components.Community
+@inject ISubforumService SubforumService
+@inject NavigationManager Navigation
+
+<PageTitle>Create a community | yap.</PageTitle>
+
+<div class="create-page">
+    <a href="/" class="back-link">← Back to discover</a>
+
+    <div class="page-heading">
+        <span class="eyebrow">✳ MAKE YOURSELF AT HOME</span>
+        <h1>Start something <em>good.</em></h1>
+        <p>Every great conversation needs a place to begin.</p>
+    </div>
+
+    <div class="form-card">
+        <h2>Create a community</h2>
+        <p>Give your little corner of yap. a name and a purpose.</p>
+
+        <form @onsubmit="CreateAsync" @onsubmit:preventDefault>
+            <div class="form-field">
+                <label for="name">Community name</label>
+                <input id="name"
+                       @bind="name"
+                       maxlength="50"
+                       required
+                       placeholder="e.g. programming"/>
+            </div>
+
+            <div class="form-field">
+                <label for="description">Description</label>
+                <textarea id="description"
+                          @bind="description"
+                          rows="4"
+                          required
+                          placeholder="What's this community about?">
+                </textarea>
+            </div>
+
+            <CommunityAppearancePicker
+                Name="@name"
+                Description="@description"
+                @bind-Color="color"
+                @bind-Symbol="symbol" />
+
+            @if (errorMessage is not null)
+            {
+                <p class="error-message">@errorMessage</p>
+            }
+
+            <button type="submit" disabled="@isSubmitting">
+                @(isSubmitting ? "Creating..." : "Create community ↗")
+            </button>
+        </form>
+    </div>
+</div>
+
+@code {
+    private string name = "";
+    private string description = "";
+    private bool isSubmitting;
+    private string? errorMessage;
+    private string color = "#E78570";
+    private string symbol = "messages-square";
+
+    private async Task CreateAsync()
+    {
+        if (isSubmitting)
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            // Temporary user ID until Assignment 6 adds login.
+            var request = new CreateSubforumDto(
+                name.Trim(),
+                description.Trim(),
+                1,
+                color,
+                symbol
+            );
+
+            await SubforumService.AddSubforumAsync(request);
+
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+}

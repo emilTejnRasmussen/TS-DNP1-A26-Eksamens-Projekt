@@ -1,6 +1,9 @@
-﻿namespace DTO.CommentVote;
+﻿using Entities;
+
+namespace DTO.CommentVote;
 
 public record CommentVoteSummaryDto(
     int Likes,
-    int Dislikes
+    int Dislikes,
+    VoteType? UserVote
 );

@@ -1,0 +1,235 @@
+﻿
+.create-post-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-bottom: 64px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--accent);
+}
+
+.page-heading {
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.page-heading h1 {
+    margin: 10px 0;
+    color: var(--text);
+    font-size: clamp(30px, 5vw, 44px);
+    font-weight: 750;
+    letter-spacing: -1.5px;
+}
+
+.page-heading h1 span {
+    color: var(--accent);
+}
+
+.page-heading p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.post-form {
+    padding: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+}
+
+.community-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.community-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: var(--bg);
+    color: var(--accent);
+}
+
+.community-preview > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.community-preview span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 1px;
+}
+
+.community-preview strong {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.form-field label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.form-field input,
+.form-field textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--background, #f8f4ee);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.7;
+    box-sizing: border-box;
+    transition: border-color 150ms ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-field textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.form-footer > span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.cancel-button {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.cancel-button:hover {
+    color: var(--text);
+}
+
+.submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.submit-button:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.submit-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.form-error {
+    margin: 0 0 18px;
+    color: #c04b42;
+    font-size: 12px;
+}
+
+.status-message {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    .post-form {
+        padding: 20px;
+    }
+
+    .form-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .form-field textarea {
+        min-height: 160px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .submit-button,
+    .form-field input,
+    .form-field textarea {
+        transition: none;
+    }
+}

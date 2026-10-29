@@ -7,5 +7,7 @@ public class Comment(string body, int userId, int postId, int? parentCommentId) 
 
     public int UserId { get; set; } = userId;
     public int PostId { get; set; } = postId;
+    
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public int? ParentCommentId { get; set; } = parentCommentId;
 }

@@ -9,5 +9,6 @@ public record PostDetailsDto(
     int UserId,
     string Username,
     int SubforumId,
+    string SubforumName,
     List<CommentDto>? Comments
 );

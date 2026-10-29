@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-inner">
+            <a class="brand" href="/">
+                yap<span>.</span>
+            </a>
+
+            <p class="brand-description">
+                a little place for big conversations.
+            </p>
+
+            <div class="sidebar-section">
+                <span class="section-label">YOUR SPACE</span>
+
+                <NavMenu />
+            </div>
+
+            <div class="sidebar-note">
+                <span class="note-decoration">✳</span>
+                <h3>Pull up a chair.</h3>
+                <p>
+                    Find your people, share your thoughts,
+                    and stay for a while.
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-area">
+        <main class="main-content">
+            @Body
+        </main>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Something went wrong.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">×</span>
+</div>

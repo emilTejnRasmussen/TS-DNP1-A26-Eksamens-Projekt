@@ -1,0 +1,114 @@
+﻿
+@using DTO.Comment
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+
+<div class="comment-form @(ParentCommentId.HasValue ? "compact" : "")">
+    @if (!ParentCommentId.HasValue)
+    {
+        <h3>Join the conversation.</h3>
+    }
+
+    <textarea
+        @bind="body"
+        @bind:event="oninput"
+        placeholder="@(ParentCommentId.HasValue
+            ? "Write your reply..."
+            : "What are your thoughts?")"
+        disabled="@isSubmitting">
+    </textarea>
+
+    <div class="form-footer">
+        @if (!ParentCommentId.HasValue)
+        {
+            <span>Keep it friendly. Keep it yap.</span>
+        }
+        else
+        {
+            <button type="button"
+                    class="cancel-button"
+                    disabled="@isSubmitting"
+                    @onclick="Cancel">
+                Cancel
+            </button>
+        }
+
+        <button
+            type="button"
+            class="submit-button"
+            disabled="@(isSubmitting || string.IsNullOrWhiteSpace(body))"
+            @onclick="SubmitAsync">
+
+            <LucideIcon Name="send" Size="16" />
+
+            @(isSubmitting
+                ? "Posting..."
+                : ParentCommentId.HasValue
+                    ? "Post reply"
+                    : "Post comment")
+        </button>
+    </div>
+
+    @if (errorMessage is not null)
+    {
+        <p class="form-error">@errorMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public int PostId { get; set; }
+
+    [Parameter, EditorRequired]
+    public int UserId { get; set; }
+
+    [Parameter]
+    public int? ParentCommentId { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentAdded { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private string body = "";
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(body) || isSubmitting)
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var dto = new CreateCommentDto(
+                body.Trim(),
+                UserId,
+                ParentCommentId
+            );
+
+            await PostService.AddCommentAsync(PostId, dto);
+
+            body = "";
+
+            await OnCommentAdded.InvokeAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Couldn't post your comment. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

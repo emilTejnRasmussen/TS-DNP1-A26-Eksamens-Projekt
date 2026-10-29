@@ -1,0 +1,44 @@
+﻿.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.navigation ::deep a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 150ms, border-color 150ms;
+}
+
+.navigation ::deep a:hover {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.navigation ::deep a.active {
+    background: var(--surface);
+    border-color: var(--text);
+}
+
+.nav-symbol {
+    width: 18px;
+    font-size: 19px;
+    text-align: center;
+}
+
+@media (max-width: 850px) {
+    .navigation {
+        flex-direction: row;
+    }
+
+    .navigation ::deep a {
+        padding: 9px 12px;
+    }
+}

@@ -9,28 +9,46 @@ namespace Services;
 public class PostService(
     IPostRepository postRepo,
     ICommentRepository commentRepo,
-    IUserRepository userRepo) : IPostService
+    IUserRepository userRepo,
+    ISubforumRepository subforumRepo) : IPostService
 {
     public async Task<PostDetailsDto> GetPostByIdAsync(int id, bool includeComments = false)
     {
         var post = await postRepo.GetSingleAsync(id);
         var user = await userRepo.GetSingleAsync(post.UserId);
-        
+        var subforum = await subforumRepo.GetSingleAsync(post.SubforumId);
+
         List<CommentDto>? comments = null;
 
-        if (includeComments)
+        if (!includeComments)
+            return PostMapper.ToDetailsDto(
+                post,
+                user.Username,
+                subforum.Name,
+                comments
+            );
+        
+        var postComments = commentRepo.GetMany()
+            .Where(c => c.PostId == id)
+            .OrderByDescending(c => c.CreatedAt);
+
+        comments = [];
+
+        foreach (var comment in postComments)
         {
-            comments = commentRepo.GetMany()
-                .Where(c => c.PostId == id)
-                .AsEnumerable()
-                .Select(CommentMapper.ToDto)
-                .ToList();
+            var commentUser = await userRepo.GetSingleAsync(comment.UserId);
+            comments.Add(CommentMapper.ToDto(comment, commentUser.Username));
         }
 
-        return PostMapper.ToDetailsDto(post, user.Username, comments);
+        return PostMapper.ToDetailsDto(
+            post,
+            user.Username,
+            subforum.Name,
+            comments
+        );
     }
 
-    public Task<IEnumerable<PostDto>> GetPostsAsync(
+    public async Task<IEnumerable<PostDto>> GetPostsAsync(
         string? titleContains = null,
         int? userId = null,
         int? subforumId = null)
@@ -39,7 +57,8 @@ public class PostService(
 
         if (!string.IsNullOrWhiteSpace(titleContains))
         {
-            posts = posts.Where(p => p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
+            posts = posts.Where(p =>
+                p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
         }
 
         if (userId.HasValue)
@@ -52,11 +71,25 @@ public class PostService(
             posts = posts.Where(p => p.SubforumId == subforumId.Value);
         }
 
-        IEnumerable<PostDto> dtos = posts
-            .AsEnumerable()
-            .Select(PostMapper.ToDto)
-            .ToList();
+        var dtos = new List<PostDto>();
 
-        return Task.FromResult(dtos);
+        var comments = commentRepo.GetMany().ToList();
+
+        foreach (var post in posts)
+        {
+            var user = await userRepo.GetSingleAsync(post.UserId);
+            var subforum = await subforumRepo.GetSingleAsync(post.SubforumId);
+
+            var commentCount = comments.Count(c => c.PostId == post.Id);
+
+            dtos.Add(PostMapper.ToDto(
+                post,
+                user.Username,
+                commentCount,
+                subforum.Name
+            ));
+        }
+
+        return dtos;
     }
 }

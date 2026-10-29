@@ -1,0 +1,171 @@
+﻿
+@page "/communities/{Id:int}/posts/create"
+@using DTO.Posts
+@using DTO.Subforum
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+@inject ISubforumService SubforumService
+@inject NavigationManager Navigation
+
+<PageTitle>Create post | yap.</PageTitle>
+
+<div class="create-post-page" style="--accent: @(community?.Color ?? "var(--coral)")">
+    <a class="back-link"
+       href="@($"/communities/{Id}")">
+        <LucideIcon Name="arrow-left" Size="15" />
+        Back to community
+    </a>
+
+    @if (isLoading)
+    {
+        <p class="status-message">Loading community...</p>
+    }
+    else if (community is null)
+    {
+        <p class="status-message">
+            @(errorMessage ?? "Community not found.")
+        </p>
+    }
+    else
+    {
+        <div class="page-heading">
+            <span class="eyebrow">SOMETHING ON YOUR MIND?</span>
+            <h1>Create a post<span>.</span></h1>
+            <p>Good conversations start somewhere.</p>
+        </div>
+
+        <div class="post-form">
+            <div class="community-preview" style="--accent: @community.Color">
+                <div class="community-icon">
+                    <LucideIcon
+                        Name="@community.Symbol"
+                        Size="22"
+                        Stroke="var(--accent)" />
+                </div>
+
+                <div>
+                    <span>POSTING TO</span>
+                    <strong>y/@community.Name</strong>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="post-title">Title</label>
+                <input
+                    id="post-title"
+                    type="text"
+                    maxlength="150"
+                    @bind="title"
+                    @bind:event="oninput"
+                    disabled="@isSubmitting"
+                    placeholder="Give your post a title..." />
+            </div>
+
+            <div class="form-field">
+                <label for="post-body">Body</label>
+                <textarea
+                    id="post-body"
+                    @bind="body"
+                    @bind:event="oninput"
+                    disabled="@isSubmitting"
+                    placeholder="What's on your mind?">
+                </textarea>
+            </div>
+
+            @if (errorMessage is not null)
+            {
+                <p class="form-error">@errorMessage</p>
+            }
+
+            <div class="form-footer">
+                <span>Keep it friendly. Keep it yap.</span>
+
+                <div class="form-actions">
+                    <a href="@($"/communities/{Id}")"
+                       class="cancel-button">
+                        Cancel
+                    </a>
+
+                    <button type="button"
+                            class="submit-button"
+                            disabled="@(!CanSubmit)"
+                            @onclick="SubmitAsync">
+                        <LucideIcon Name="send" Size="16" />
+                        @(isSubmitting ? "Publishing..." : "Publish post")
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private SubforumDto? community;
+
+    private string title = "";
+    private string body = "";
+    private string? errorMessage;
+
+    private bool isLoading = true;
+    private bool isSubmitting;
+
+    private bool CanSubmit =>
+        !isSubmitting &&
+        !string.IsNullOrWhiteSpace(title) &&
+        !string.IsNullOrWhiteSpace(body);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        community = null;
+
+        try
+        {
+            community = await SubforumService.GetSubforumAsync(Id);
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "We couldn't load this community.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (!CanSubmit || community is null)
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            // TODO: Replace with authenticated user in Assignment 6
+            var dto = new CreatePostDto(
+                title.Trim(),
+                body.Trim(),
+                1,
+                Id
+            );
+
+            var createdPost = await PostService.AddPostAsync(dto);
+
+            Navigation.NavigateTo($"/posts/{createdPost.Id}");
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Couldn't publish your post. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

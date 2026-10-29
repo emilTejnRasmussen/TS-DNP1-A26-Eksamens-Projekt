@@ -1,0 +1,115 @@
+﻿<div class="appearance-picker">
+    <div class="picker-section">
+        <label>Community color</label>
+
+        <div class="color-options">
+            @foreach (var option in Colors)
+            {
+                <button type="button"
+                        class="color-option @(Color == option ? "selected" : "")"
+                        style="background-color: @option"
+                        aria-label="Select color @option"
+                        aria-pressed="@(Color == option)"
+                        @onclick="() => SelectColor(option)">
+                    @if (Color == option)
+                    {
+                        <span>✓</span>
+                    }
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="picker-section">
+        <label>Community icon</label>
+
+        <div class="icon-options">
+            @foreach (var icon in Icons)
+            {
+                <button type="button"
+                        class="icon-option @(Symbol == icon ? "selected" : "")"
+                        title="@icon"
+                        aria-label="Select @icon icon"
+                        aria-pressed="@(Symbol == icon)"
+                        @onclick="() => SelectSymbol(icon)">
+                    <LucideIcon Name="@icon" Size="22" StrokeWidth="1.8" />
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="preview-label">LIVE PREVIEW</div>
+
+    <div class="community-preview" style="--accent: @Color">
+        <span class="preview-symbol">
+            <LucideIcon Name="@Symbol"
+                        Size="28"
+                        Stroke="var(--accent)"
+                        StrokeWidth="1.8" />
+        </span>
+
+        <div class="preview-body">
+            <h3>@(string.IsNullOrWhiteSpace(Name) ? "Your community" : Name)</h3>
+            <p>
+                @(string.IsNullOrWhiteSpace(Description)
+                    ? "A little place for your favorite things."
+                    : Description)
+            </p>
+        </div>
+
+        <div class="preview-footer">
+            <span>0 posts</span>
+            <span>Explore ↗</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private static readonly string[] Colors =
+    [
+        "#E78570",
+        "#94B69A",
+        "#91B6D8",
+        "#E2BE65",
+        "#DDA4B8",
+        "#E9A063"
+    ];
+
+    private static readonly string[] Icons =
+    [
+        "messages-square", "sprout", "leaf", "sun",
+        "moon-star", "cloud", "coffee", "heart",
+        "palette", "music-2", "book-open", "camera",
+        "gamepad-2", "code-xml", "headphones", "pencil",
+        "flower-2", "users-round", "house", "star",
+        "sparkles", "lightbulb", "compass", "rocket"
+    ];
+
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    [Parameter]
+    public string Description { get; set; } = "";
+
+    [Parameter]
+    public string Color { get; set; } = "#E78570";
+
+    [Parameter]
+    public EventCallback<string> ColorChanged { get; set; }
+
+    [Parameter]
+    public string Symbol { get; set; } = "messages-square";
+
+    [Parameter]
+    public EventCallback<string> SymbolChanged { get; set; }
+
+    private async Task SelectColor(string color)
+    {
+        await ColorChanged.InvokeAsync(color);
+    }
+
+    private async Task SelectSymbol(string symbol)
+    {
+        await SymbolChanged.InvokeAsync(symbol);
+    }
+}

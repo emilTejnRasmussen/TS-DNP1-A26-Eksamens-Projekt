@@ -21,12 +21,16 @@ public class PostsController(
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] CreatePostDto request)
     {
-        await userRepo.GetSingleAsync(request.UserId);
-        await subforumRepo.GetSingleAsync(request.SubforumId);
-        
+        var user = await userRepo.GetSingleAsync(request.UserId);
+        var subforum = await subforumRepo.GetSingleAsync(request.SubforumId);
+
         var created = await postRepo.AddAsync(PostMapper.ToEntity(request));
 
-        return Created($"/posts/{created.Id}", PostMapper.ToDto(created));
+        return Created($"/posts/{created.Id}", PostMapper.ToDto(
+            created,
+            user.Username,
+            0,
+            subforum.Name));
     }
 
     [HttpGet("{id:int}")]
@@ -81,12 +85,12 @@ public class PostsController(
         [FromBody] CreateCommentDto request
     )
     {
-        await userRepo.GetSingleAsync(request.UserId);
+        var user = await userRepo.GetSingleAsync(request.UserId);
         await postRepo.GetSingleAsync(postId);
 
         var created = await commentRepo.AddAsync(CommentMapper.ToEntity(request, postId));
 
-        return Created($"/comments/{created.Id}", CommentMapper.ToDto(created));
+        return Created($"/comments/{created.Id}", CommentMapper.ToDto(created, user.Username));
     }
 
     [HttpGet("{postId:int}/comments")]
@@ -94,11 +98,17 @@ public class PostsController(
     {
         await postRepo.GetSingleAsync(postId);
 
-        var commentDtos = commentRepo.GetMany()
+        var comments = commentRepo.GetMany()
             .Where(comment => comment.PostId == postId)
-            .AsEnumerable()
-            .Select(CommentMapper.ToDto)
-            .ToList();
+            .OrderByDescending(c => c.CreatedAt);
+
+        var commentDtos = new List<CommentDto>();
+
+        foreach (var comment in comments)
+        {
+            var user = await userRepo.GetSingleAsync(comment.UserId);
+            commentDtos.Add(CommentMapper.ToDto(comment, user.Username));
+        }
 
         return Ok(commentDtos);
     }
@@ -120,10 +130,11 @@ public class PostsController(
     }
 
     [HttpGet("{postId:int}/votes")]
-    public async Task<IActionResult> GetVotes([FromRoute] int postId)
+    public async Task<IActionResult> GetVotes(
+        [FromRoute] int postId,
+        [FromQuery] int? userId = null)
     {
-        var votes = await postVoteService.GetVotesAsync(postId);
-
+        var votes = await postVoteService.GetVotesAsync(postId, userId);
         return Ok(votes);
     }
 }

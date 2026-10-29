@@ -4,5 +4,6 @@ namespace DTO.PostVote;
 
 public record PostVoteSummaryDto(
     int Likes,
-    int Dislikes
+    int Dislikes,
+    VoteType? UserVote
 );

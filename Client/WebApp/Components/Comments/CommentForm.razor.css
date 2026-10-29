@@ -1,0 +1,122 @@
+﻿
+.comment-form {
+    padding: 24px 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.comment-form h3 {
+    margin: 0 0 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.comment-form textarea {
+    display: block;
+    width: 100%;
+    min-height: 110px;
+    padding: 14px 16px;
+    background: var(--background, #f8f4ee);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.7;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+}
+
+.comment-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.form-footer span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.form-footer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.submit-button {
+    background: var(--coral);
+    color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.form-footer button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.cancel-button:hover:not(:disabled) {
+    color: var(--text);
+}
+
+.form-error {
+    margin: 12px 0 0;
+    color: #c04b42;
+    font-size: 12px;
+}
+
+/* Compact reply form */
+
+.comment-form.compact {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.comment-form.compact textarea {
+    min-height: 85px;
+}
+
+.comment-form.compact .form-footer {
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .comment-form:not(.compact) {
+        padding: 20px;
+    }
+
+    .form-footer {
+        flex-wrap: wrap;
+    }
+}

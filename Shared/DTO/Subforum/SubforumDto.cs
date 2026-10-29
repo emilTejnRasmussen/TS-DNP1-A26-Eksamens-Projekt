@@ -5,5 +5,7 @@ public record SubforumDto(
     string Name,
     string Description,
     int CreatorId,
-    int PostCount
+    int PostCount,
+    string Color,
+    string Symbol
 );

@@ -1,0 +1,53 @@
+﻿.vote-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #f0eae2;
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.vote-pill button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.vote-pill button:disabled {
+    cursor: default;
+}
+
+.vote-pill button:not(:disabled):hover {
+    color: var(--coral);
+}
+
+.vote-pill > span {
+    min-width: 18px;
+    text-align: center;
+}
+
+.vote-pill.compact {
+    gap: 5px;
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.vote-pill button.selected {
+    color: var(--coral);
+}
+
+.vote-pill button.selected:hover {
+    color: var(--coral);
+}
+
+.vote-pill button:not(:disabled):not(.selected):hover {
+    color: var(--coral);
+}

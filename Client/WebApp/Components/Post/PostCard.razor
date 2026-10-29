@@ -1,0 +1,94 @@
+﻿@using DTO.Posts
+@using DTO.PostVote
+@using Entities
+@using WebApp.Components.Voting
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+@inject NavigationManager Navigation
+
+<article class="post-card"
+         style="--accent: @AccentColor"
+         @onclick="OpenPost">
+
+    <div class="post-author">
+        <a href="@($"/communities/{Post.SubforumId}")"
+           @onclick:stopPropagation="true">
+            y/@Post.SubforumName
+        </a>
+    </div>
+
+    <div class="post-content">
+        <h3>
+            <a href="@($"/posts/{Post.Id}")"
+               @onclick:stopPropagation="true">
+                @Post.Title
+            </a>
+        </h3>
+
+        <p>@Post.Body</p>
+    </div>
+
+    <div class="post-footer">
+        <div @onclick:stopPropagation="true">
+            @if (votes is not null)
+            {
+                <VotePill
+                    Likes="@votes.Likes"
+                    Dislikes="@votes.Dislikes"
+                    UserVote="@votes.UserVote"
+                    Compact="true"
+                    Disabled="@isVoting"
+                    OnUpvote="() => VoteAsync(VoteType.Like)"
+                    OnDownvote="() => VoteAsync(VoteType.Dislike)" />
+            }
+        </div>
+
+        <a class="comment-pill"
+           href="@($"/posts/{Post.Id}")"
+           @onclick:stopPropagation="true">
+            <LucideIcon Name="message-circle" Size="18"/>
+            <span>@Post.CommentCount</span>
+        </a>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public required PostDto Post { get; set; }
+
+    [Parameter] public string AccentColor { get; set; } = "#E78570";
+
+    private PostVoteSummaryDto? votes;
+
+    private void OpenPost()
+    {
+        Navigation.NavigateTo($"/posts/{Post.Id}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        votes = await PostService.GetVotesAsync(Post.Id, 1);
+    }
+    private bool isVoting;
+
+    private async Task VoteAsync(VoteType voteType)
+    {
+        if (isVoting)
+            return;
+
+        isVoting = true;
+
+        try
+        {
+            // TODO User logged in  user userid instead
+            var dto = new CreatePostVoteDto(1, voteType);
+
+            await PostService.AddVoteAsync(Post.Id, dto);
+
+            votes = await PostService.GetVotesAsync(Post.Id, 1);
+        }
+        finally
+        {
+            isVoting = false;
+        }
+    }
+}

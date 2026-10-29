@@ -1,0 +1,114 @@
+﻿@page "/"
+@using DTO.Subforum
+@using WebApp.Services.Interfaces
+@using WebApp.Components.Community
+@inject ISubforumService SubforumService
+
+<PageTitle>Discover | yap.</PageTitle>
+
+<div class="home">
+    <section class="welcome">
+        <div class="welcome-copy">
+            <span class="eyebrow">✳ HELLO, STRANGER</span>
+
+            <h1>Find your <em>people.</em></h1>
+
+            <p>
+                A cozy corner of the internet for curious minds,
+                random thoughts, and really good conversations.
+            </p>
+        </div>
+
+        <div class="welcome-sticker" aria-hidden="true">
+            <span>good</span>
+            <span>things</span>
+            <span>happen</span>
+            <span>here ✳</span>
+        </div>
+    </section>
+
+    <section id="communities" class="communities">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">A PLACE FOR EVERY INTEREST</span>
+                <h2>Explore communities<span class="heading-dot">.</span></h2>
+            </div>
+
+            <div class="heading-actions">
+                @if (subforums is not null)
+                {
+                    <span class="community-count">
+                        @subforums.Count @(subforums.Count == 1 ? "community" : "communities")
+                    </span>
+                }
+
+                <a href="/communities/create" class="create-button">
+                    + Create community
+                </a>
+            </div>
+        </div>
+
+        @if (errorMessage is not null)
+        {
+            <div class="feedback">
+                <h3>Couldn't load communities.</h3>
+                <p>@errorMessage</p>
+                <button @onclick="LoadSubforumsAsync">Try again</button>
+            </div>
+        }
+        else if (subforums is null)
+        {
+            <p class="loading">Finding your communities...</p>
+        }
+        else if (subforums.Count == 0)
+        {
+            <div class="feedback">
+                <h3>It's a little quiet here.</h3>
+                <p>No communities have been created yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="community-grid">
+                @foreach (var subforum in subforums)
+                {
+                    <CommunityCard Community="subforum" @key="subforum.Id" />
+                }
+            </div>
+        }
+    </section>
+
+    <footer class="home-footer">
+        <span>✳ a little community goes a long way.</span>
+        <span>yap. © @DateTime.Now.Year</span>
+    </footer>
+</div>
+
+@code {
+    private List<SubforumDto>? subforums;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubforumsAsync();
+    }
+
+    private async Task LoadSubforumsAsync()
+    {
+        errorMessage = null;
+        subforums = null;
+
+        try
+        {
+            subforums = await SubforumService.GetSubforumsAsync();
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Please check that the Web API is running.";
+        }
+        catch (Exception)
+        {
+            errorMessage = "An unexpected error occurred.";
+        }
+    }
+}

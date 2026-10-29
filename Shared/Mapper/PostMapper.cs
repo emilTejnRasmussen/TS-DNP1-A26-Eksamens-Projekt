@@ -6,20 +6,24 @@ namespace Mapper;
 
 public static class PostMapper
 {
-    public static PostDto ToDto(Post post)
+    public static PostDto ToDto(Post post, string username, int commentCount, string subforumName)
     {
         return new PostDto(
             post.Id,
             post.Title,
             post.Body,
             post.UserId,
-            post.SubforumId
+            username,
+            post.SubforumId,
+            subforumName,
+            commentCount
         );
     }
 
     public static PostDetailsDto ToDetailsDto(
         Post post,
         string username,
+        string subforumName,
         List<CommentDto>? comments)
     {
         return new PostDetailsDto(
@@ -29,6 +33,7 @@ public static class PostMapper
             post.UserId,
             username,
             post.SubforumId,
+            subforumName,
             comments
         );
     }

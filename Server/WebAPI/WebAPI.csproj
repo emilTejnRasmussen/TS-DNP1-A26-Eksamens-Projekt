@@ -18,9 +18,5 @@
       <ProjectReference Include="..\FileRepositories\FileRepositories.csproj" />
       <ProjectReference Include="..\Services\Services.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="data\" />
-    </ItemGroup>
-
+    
 </Project>

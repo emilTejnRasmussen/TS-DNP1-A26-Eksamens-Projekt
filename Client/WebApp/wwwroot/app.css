@@ -1,0 +1,82 @@
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    --bg: #f7f2e9;
+    --surface: #fffdf8;
+
+    --text: #302b27;
+    --text-muted: #82786e;
+
+    --border: #ded6cb;
+
+    --coral: #e78570;
+    --orange: #e9a063;
+    --sage: #94b69a;
+    --blue: #91b6d8;
+    --pink: #dda4b8;
+    --mustard: #fff0c8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--coral);
+    outline-offset: 3px;
+}
+
+::selection {
+    background: #f2cfbd;
+    color: var(--text);
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 16px 24px;
+    background: #fff0e7;
+    border-top: 2px solid var(--coral);
+    color: var(--text);
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    right: 20px;
+    top: 12px;
+    cursor: pointer;
+}

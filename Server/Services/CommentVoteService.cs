@@ -9,7 +9,7 @@ public class CommentVoteService(
     ICommentRepository commentRepo,
     ICommentVoteRepository commentVoteRepo) : ICommentVoteService
 {
-    public async Task<CommentVoteSummaryDto> GetVotesAsync(int commentId)
+    public async Task<CommentVoteSummaryDto> GetVotesAsync(int commentId, int? userId = null)
     {
         await commentRepo.GetSingleAsync(commentId);
 
@@ -17,9 +17,14 @@ public class CommentVoteService(
             .Where(v => v.CommentId == commentId)
             .ToList();
 
+        var userVote = userId.HasValue
+            ? votes.FirstOrDefault(v => v.UserId == userId.Value)?.VoteType
+            : null;
+
         return new CommentVoteSummaryDto(
             votes.Count(v => v.VoteType == VoteType.Like),
-            votes.Count(v => v.VoteType == VoteType.Dislike)
+            votes.Count(v => v.VoteType == VoteType.Dislike),
+            userVote
         );
     }
 

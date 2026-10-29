@@ -4,6 +4,8 @@ public record CommentDto(
     int Id,
     string Body,
     int UserId,
+    string Username,
     int PostId,
+    DateTimeOffset CreatedAt,
     int? ParentCommentId
 );

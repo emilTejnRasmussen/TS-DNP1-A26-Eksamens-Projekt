@@ -1,0 +1,95 @@
+﻿@page "/communities/{Id:int}"
+@using DTO.Subforum
+@using DTO.Posts
+@using WebApp.Services.Interfaces
+@using WebApp.Components.Community
+@using WebApp.Components.Post
+@inject ISubforumService SubforumService
+@inject IPostService PostService
+
+<PageTitle>@(community?.Name ?? "Community") | yap.</PageTitle>
+
+<div class="community-page">
+    <a href="/" class="back-link">← Back to discover</a>
+
+    @if (errorMessage is not null)
+    {
+        <div class="feedback">
+            <h3>Couldn't load the community.</h3>
+            <p>@errorMessage</p>
+        </div>
+    }
+    else if (community is null)
+    {
+        <p class="loading">Loading community...</p>
+    }
+    else
+    {
+        <CommunityHeader Community="community"/>
+
+        <section class="posts-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">WHAT'S HAPPENING</span>
+                    <h2>Conversations<span>.</span></h2>
+                </div>
+            </div>
+
+            @if (posts is null)
+            {
+                <p class="loading">Loading posts...</p>
+            }
+            else if (posts.Count == 0)
+            {
+                <div class="empty-state">
+                    <h3>It's quiet in here.</h3>
+                    <p>Be the first to start a conversation!</p>
+                </div>
+            }
+            else
+            {
+                <div class="posts-list">
+                    @foreach (var post in posts)
+                    {
+                        <PostCard Post="post"
+                                  AccentColor="@community.Color"
+                                  @key="post.Id"/>
+                    }
+                </div>
+            }
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter] 
+    public int Id { get; set; }
+
+    private SubforumDto? community;
+    private List<PostDto>? posts;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        community = null;
+        posts = null;
+        errorMessage = null;
+
+        try
+        {
+            community = await SubforumService.GetSubforumAsync(Id);
+            posts = await PostService.GetPostsAsync(subforumId: Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.StatusCode == System.Net.HttpStatusCode.NotFound
+                ? "This community doesn't exist."
+                : "Please check that the Web API is running.";
+        }
+        catch (Exception)
+        {
+            errorMessage = "An unexpected error occurred.";
+        }
+    }
+
+}
