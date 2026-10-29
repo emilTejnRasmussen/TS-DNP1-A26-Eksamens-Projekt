@@ -14,7 +14,8 @@ public class HttpUserService(HttpClient client) : IUserService
         return (await response.Content.ReadFromJsonAsync<UserDto>())!;
     }
 
-    public async Task<List<UserDto>> GetUsersAsync(string? nameContains = null)
+    public async Task<List<UserDto>> GetUsersAsync(
+        string? nameContains = null)
     {
         var url = "users";
 
@@ -27,16 +28,20 @@ public class HttpUserService(HttpClient client) : IUserService
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
 
-        return (await response.Content.ReadFromJsonAsync<List<UserDto>>())!;
+        return (await response.Content
+            .ReadFromJsonAsync<List<UserDto>>())!;
     }
 
     public async Task UpdateUserAsync(UpdateUserRequest request)
     {
-        var response = await client.PatchAsJsonAsync($"users/me", request);
+        var response = await client.PatchAsJsonAsync(
+            "users/me",
+            request
+        );
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }
-    
+
     public async Task ChangePasswordAsync(ChangePasswordRequest request)
     {
         var response = await client.PutAsJsonAsync(
@@ -49,7 +54,7 @@ public class HttpUserService(HttpClient client) : IUserService
 
     public async Task DeleteUserAsync()
     {
-        var response = await client.DeleteAsync($"users/me");
+        var response = await client.DeleteAsync("users/me");
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }

@@ -38,10 +38,24 @@
             </a>
 
             <AuthorizeView>
-                <Authorized>
+                <Authorized Context="auth">
                     <NavLink href="/communities/create">
                         <span class="nav-symbol">+</span>
                         Create community
+                    </NavLink>
+
+                    <NavLink href="@($"/users/{auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value}")">
+                        <span class="nav-symbol">
+                            <LucideIcon Name="user-round" Size="18" />
+                        </span>
+                        Profile
+                    </NavLink>
+
+                    <NavLink href="/settings">
+                        <span class="nav-symbol">
+                            <LucideIcon Name="settings-2" Size="18" />
+                        </span>
+                        Settings
                     </NavLink>
                 </Authorized>
             </AuthorizeView>
@@ -51,7 +65,9 @@
     <div class="account-footer">
         <AuthorizeView>
             <Authorized>
-                <form method="post" action="/session/logout">
+                <form method="post"
+                      action="/session/logout"
+                      data-enhance="false">
                     <AntiforgeryToken />
 
                     <button type="submit" class="footer-action">
@@ -74,5 +90,4 @@
             </NotAuthorized>
         </AuthorizeView>
     </div>
-
 </div>

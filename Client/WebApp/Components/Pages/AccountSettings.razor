@@ -1,0 +1,356 @@
+﻿
+@page "/settings"
+@using System.Security.Claims
+@using System.Net
+@using DTO.User
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebApp.Services.Interfaces
+
+@inject IUserService UserService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Account settings | yap.</PageTitle>
+
+<div class="settings-page">
+    @if (isLoading)
+    {
+        <p class="settings-status">Loading your account...</p>
+    }
+    else if (!isAuthenticated)
+    {
+        <div class="settings-status">
+            <h2>You're not logged in.</h2>
+            <p>Log in to manage your yap. account.</p>
+            <a href="/login">Log in</a>
+        </div>
+    }
+    else
+    {
+        <header class="settings-header">
+            <a class="settings-back" href="@($"/users/{currentUserId}")">
+                <LucideIcon Name="arrow-left" Size="15" />
+                Back to profile
+            </a>
+
+            <span class="settings-eyebrow">✳ YOUR CORNER OF YAP.</span>
+            <h1>Account settings<span>.</span></h1>
+            <p>Make this little space your own.</p>
+        </header>
+
+        <section class="settings-section">
+            <div class="settings-section-heading">
+                <div>
+                    <h2>Username</h2>
+                    <p>Change the name people see around yap.</p>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-field">
+                    <label for="settings-username">Your username</label>
+
+                    <input id="settings-username"
+                           type="text"
+                           maxlength="50"
+                           autocomplete="username"
+                           @bind="username"
+                           @bind:event="oninput"
+                           disabled="@isUpdatingUsername" />
+                </div>
+
+                @if (usernameError is not null)
+                {
+                    <p class="settings-error" role="alert">@usernameError</p>
+                }
+
+                @if (usernameMessage is not null)
+                {
+                    <p class="settings-success" role="status">
+                        @usernameMessage
+                    </p>
+                }
+
+                <div class="settings-actions">
+                    <button type="button"
+                            class="settings-button"
+                            disabled="@(isUpdatingUsername || string.IsNullOrWhiteSpace(username))"
+                            @onclick="UpdateUsernameAsync">
+                        @(isUpdatingUsername ? "Saving..." : "Save username")
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="settings-section">
+            <div class="settings-section-heading">
+                <div>
+                    <h2>Password</h2>
+                    <p>Keep your account safe with a strong password.</p>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-field">
+                    <label for="current-password">Current password</label>
+
+                    <input id="current-password"
+                           type="password"
+                           autocomplete="current-password"
+                           @bind="currentPassword"
+                           disabled="@isChangingPassword" />
+                </div>
+
+                <div class="settings-field">
+                    <label for="new-password">New password</label>
+
+                    <input id="new-password"
+                           type="password"
+                           autocomplete="new-password"
+                           @bind="newPassword"
+                           disabled="@isChangingPassword" />
+                    <span class="settings-hint">Use at least 8 characters.</span>
+                </div>
+
+                <div class="settings-field">
+                    <label for="confirm-password">Confirm new password</label>
+
+                    <input id="confirm-password"
+                           type="password"
+                           autocomplete="new-password"
+                           @bind="confirmPassword"
+                           disabled="@isChangingPassword" />
+                </div>
+
+                @if (passwordError is not null)
+                {
+                    <p class="settings-error" role="alert">@passwordError</p>
+                }
+
+                @if (passwordMessage is not null)
+                {
+                    <p class="settings-success" role="status">@passwordMessage</p>
+                }
+
+                <div class="settings-actions">
+                    <button type="button"
+                            class="settings-button"
+                            disabled="@isChangingPassword"
+                            @onclick="ChangePasswordAsync">
+                        @(isChangingPassword ? "Updating..." : "Update password")
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="settings-section danger-section">
+            <div class="settings-section-heading">
+                <div>
+                    <span class="settings-eyebrow">DANGER ZONE</span>
+                    <h2>Delete account</h2>
+                    <p>This action cannot be undone.</p>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <p class="danger-description">
+                    Permanently delete your yap. account.
+                    Your existing posts, comments, and communities
+                    may still need separate cleanup.
+                </p>
+
+                <form method="post"
+                      action="/session/delete"
+                      data-enhance="false">
+                    <AntiforgeryToken />
+
+                    <div class="settings-field">
+                        <label for="delete-confirmation">
+                            Type DELETE to confirm
+                        </label>
+
+                        <input id="delete-confirmation"
+                               name="confirmation"
+                               type="text"
+                               autocomplete="off"
+                               pattern="DELETE"
+                               required
+                               placeholder="DELETE" />
+                    </div>
+
+                    @if (DeleteError is not null)
+                    {
+                        <p class="settings-error" role="alert">
+                            Couldn't delete the account.
+                            Please try again.
+                        </p>
+                    }
+
+                    <button type="submit" class="delete-button">
+                        <LucideIcon Name="trash-2" Size="16" />
+                        Permanently delete account
+                    </button>
+                </form>
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    private string? DeleteError { get; set; }
+
+    private bool isLoading = true;
+    private bool isAuthenticated;
+    private int currentUserId;
+
+    private string username = "";
+    private string currentPassword = "";
+    private string newPassword = "";
+    private string confirmPassword = "";
+
+    private bool isUpdatingUsername;
+    private bool isChangingPassword;
+
+    private string? usernameError;
+    private string? usernameMessage;
+    private string? passwordError;
+    private string? passwordMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            if (authState.User.Identity?.IsAuthenticated != true)
+                return;
+
+            var idClaim = authState.User.FindFirst(
+                ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(idClaim, out currentUserId))
+                return;
+
+            isAuthenticated = true;
+
+            var user = await UserService.GetUserAsync(currentUserId);
+            username = user.Username;
+        }
+        catch (HttpRequestException)
+        {
+            usernameError = "Couldn't load your account information.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateUsernameAsync()
+    {
+        if (isUpdatingUsername)
+            return;
+
+        usernameError = null;
+        usernameMessage = null;
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            usernameError = "Please enter a username.";
+            return;
+        }
+
+        isUpdatingUsername = true;
+
+        try
+        {
+            await UserService.UpdateUserAsync(
+                new UpdateUserRequest(username.Trim())
+            );
+
+            usernameMessage =
+                "Username updated! Log out and log back in " +
+                "to refresh your profile name and session.";
+        }
+        catch (HttpRequestException ex)
+        {
+            usernameError = ex.StatusCode switch
+            {
+                HttpStatusCode.Conflict =>
+                    "That username is already taken.",
+
+                HttpStatusCode.Unauthorized =>
+                    "Your session has expired. Please log in again.",
+
+                _ => "Couldn't update your username."
+            };
+        }
+        finally
+        {
+            isUpdatingUsername = false;
+        }
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        if (isChangingPassword)
+            return;
+
+        passwordError = null;
+        passwordMessage = null;
+
+        if (string.IsNullOrWhiteSpace(currentPassword))
+        {
+            passwordError = "Enter your current password.";
+            return;
+        }
+
+        if (newPassword.Length < 8)
+        {
+            passwordError = "Use at least 8 characters.";
+            return;
+        }
+
+        if (newPassword != confirmPassword)
+        {
+            passwordError = "Your new passwords don't match.";
+            return;
+        }
+
+        isChangingPassword = true;
+
+        try
+        {
+            await UserService.ChangePasswordAsync(
+                new ChangePasswordRequest(
+                    currentPassword,
+                    newPassword
+                )
+            );
+
+            currentPassword = "";
+            newPassword = "";
+            confirmPassword = "";
+
+            passwordMessage = "Your password has been updated.";
+        }
+        catch (HttpRequestException ex)
+        {
+            passwordError = ex.StatusCode switch
+            {
+                HttpStatusCode.BadRequest =>
+                    "Your current password is incorrect, or the new password is invalid.",
+
+                HttpStatusCode.Unauthorized =>
+                    "Your session has expired. Please log in again.",
+
+                _ => "Couldn't update your password."
+            };
+        }
+        finally
+        {
+            isChangingPassword = false;
+        }
+    }
+}

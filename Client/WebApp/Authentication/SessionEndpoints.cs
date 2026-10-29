@@ -81,6 +81,57 @@ public static class SessionEndpoints
 
             return Results.Redirect("/");
         });
+        
+        
+        app.MapPost("/session/delete", async (
+            [FromForm] string confirmation,
+            HttpContext context,
+            IHttpClientFactory clientFactory) =>
+        {
+            if (context.User.Identity?.IsAuthenticated != true)
+            {
+                return Results.Redirect("/login");
+            }
+
+            if (confirmation != "DELETE")
+            {
+                return Results.Redirect("/settings?error=confirmation");
+            }
+
+            var token = context.User.FindFirst("api_token")?.Value;
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return Results.Redirect("/settings?error=session");
+            }
+
+            var client = clientFactory.CreateClient("api");
+
+            using var request = new HttpRequestMessage(
+                HttpMethod.Delete,
+                "users/me"
+            );
+
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Bearer",
+                    token
+                );
+
+            using var response = await client.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Results.Redirect("/settings?error=delete");
+            }
+
+            await context.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            return Results.Redirect("/");
+        }).RequireAuthorization();
+
     }
 
     private static async Task SignInAsync(
