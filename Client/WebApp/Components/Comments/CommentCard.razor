@@ -26,6 +26,7 @@
             <VotePill
                 Likes="@votes.Likes"
                 Dislikes="@votes.Dislikes"
+                UserVote="@votes.UserVote"
                 Compact="true"
                 Disabled="@isVoting"
                 OnUpvote="() => VoteAsync(VoteType.Like)"
@@ -109,7 +110,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        votes = await CommentService.GetVotesAsync(Comment.Id);
+        votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
     }
 
     private async Task VoteAsync(VoteType voteType)
@@ -125,7 +126,7 @@
 
             await CommentService.AddVoteAsync(Comment.Id, dto);
 
-            votes = await CommentService.GetVotesAsync(Comment.Id);
+            votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
         }
         finally
         {

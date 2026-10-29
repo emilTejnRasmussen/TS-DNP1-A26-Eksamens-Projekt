@@ -39,3 +39,15 @@
     padding: 4px 8px;
     font-size: 11px;
 }
+
+.vote-pill button.selected {
+    color: var(--coral);
+}
+
+.vote-pill button.selected:hover {
+    color: var(--coral);
+}
+
+.vote-pill button:not(:disabled):not(.selected):hover {
+    color: var(--coral);
+}

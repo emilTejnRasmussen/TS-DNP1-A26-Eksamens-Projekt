@@ -41,9 +41,11 @@
                 <VotePill
                     Likes="@votes.Likes"
                     Dislikes="@votes.Dislikes"
+                    UserVote="@votes.UserVote"
+                    Compact="true"
                     Disabled="@isVoting"
                     OnUpvote="() => VoteAsync(VoteType.Like)"
-                    OnDownvote="() => VoteAsync(VoteType.Dislike)"/>
+                    OnDownvote="() => VoteAsync(VoteType.Dislike)" />
 
                 <div class="comment-pill">
                     <LucideIcon Name="message-circle" Size="18"/>
@@ -111,7 +113,7 @@
         try
         {
             var postTask = PostService.GetPostAsync(Id, includeComments: true);
-            var votesTask = PostService.GetVotesAsync(Id);
+            var votesTask = PostService.GetVotesAsync(Id, 1);
 
             await Task.WhenAll(postTask, votesTask);
 
@@ -147,11 +149,12 @@
 
         try
         {
+            // TODO Change to logged in user userId
             var dto = new CreatePostVoteDto(1, voteType);
 
             await PostService.AddVoteAsync(Id, dto);
 
-            votes = await PostService.GetVotesAsync(Id);
+            votes = await PostService.GetVotesAsync(Id, 1);
         }
         finally
         {

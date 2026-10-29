@@ -19,5 +19,5 @@ public interface IPostService
     Task<List<CommentDto>> GetCommentsAsync(int postId);
 
     Task AddVoteAsync(int postId, CreatePostVoteDto request);
-    Task<PostVoteSummaryDto> GetVotesAsync(int postId);
+    Task<PostVoteSummaryDto> GetVotesAsync(int postId, int? userId = null);
 }

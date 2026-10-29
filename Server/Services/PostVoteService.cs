@@ -9,17 +9,23 @@ public class PostVoteService(
     IPostRepository postRepo,
     IPostVoteRepository postVoteRepo) : IPostVoteService
 {
-    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId)
+    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId, int? userId = null)
     {
         await postRepo.GetSingleAsync(postId);
 
         var votes = postVoteRepo.GetMany()
             .Where(v => v.PostId == postId)
             .ToList();
+        
+        var userVote = userId.HasValue
+            ? votes.FirstOrDefault(v => v.UserId == userId.Value)?.VoteType
+            : null;
+
 
         return new PostVoteSummaryDto(
             votes.Count(v => v.VoteType == VoteType.Like),
-            votes.Count(v => v.VoteType == VoteType.Dislike)
+            votes.Count(v => v.VoteType == VoteType.Dislike),
+            userVote
         );
     }
     

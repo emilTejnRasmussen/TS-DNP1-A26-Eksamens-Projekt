@@ -130,10 +130,11 @@ public class PostsController(
     }
 
     [HttpGet("{postId:int}/votes")]
-    public async Task<IActionResult> GetVotes([FromRoute] int postId)
+    public async Task<IActionResult> GetVotes(
+        [FromRoute] int postId,
+        [FromQuery] int? userId = null)
     {
-        var votes = await postVoteService.GetVotesAsync(postId);
-
+        var votes = await postVoteService.GetVotesAsync(postId, userId);
         return Ok(votes);
     }
 }

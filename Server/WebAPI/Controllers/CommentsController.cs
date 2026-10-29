@@ -103,10 +103,11 @@ public class CommentsController(
     }
     
     [HttpGet("{commentId:int}/votes")]
-    public async Task<IActionResult> GetVotes([FromRoute] int commentId)
+    public async Task<IActionResult> GetVotes(
+        [FromRoute] int commentId,
+        [FromQuery] int? userId = null)
     {
-        var votes = await commentVoteService.GetVotesAsync(commentId);
-
+        var votes = await commentVoteService.GetVotesAsync(commentId, userId);
         return Ok(votes);
     }
 }
