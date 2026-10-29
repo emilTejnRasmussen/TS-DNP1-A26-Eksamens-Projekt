@@ -99,7 +99,8 @@ public class PostsController(
         await postRepo.GetSingleAsync(postId);
 
         var comments = commentRepo.GetMany()
-            .Where(comment => comment.PostId == postId);
+            .Where(comment => comment.PostId == postId)
+            .OrderByDescending(c => c.CreatedAt);
 
         var commentDtos = new List<CommentDto>();
 

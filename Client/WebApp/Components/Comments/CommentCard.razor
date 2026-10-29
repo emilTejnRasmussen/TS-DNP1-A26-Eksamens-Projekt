@@ -1,10 +1,16 @@
 ﻿@using DTO.Comment
+@using WebApp.Helpers
 
 <article class="comment">
     <div class="comment-header">
         <a href="@($"/users/{Comment.UserId}")">
             u/@Comment.Username
         </a>
+
+        <span class="comment-time"
+              title="@Comment.CreatedAt.ToString("dd MMM yyyy, HH:mm 'UTC'")">
+            @TimeFormatter.TimeAgo(Comment.CreatedAt)
+        </span>
     </div>
 
     <p class="comment-body">@Comment.Body</p>

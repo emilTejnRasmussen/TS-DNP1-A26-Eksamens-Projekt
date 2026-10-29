@@ -29,7 +29,8 @@ public class PostService(
             );
         
         var postComments = commentRepo.GetMany()
-            .Where(c => c.PostId == id);
+            .Where(c => c.PostId == id)
+            .OrderByDescending(c => c.CreatedAt);
 
         comments = [];
 

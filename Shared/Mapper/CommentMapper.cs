@@ -13,6 +13,7 @@ public static class CommentMapper
             comment.UserId,
             username,
             comment.PostId,
+            comment.CreatedAt,
             comment.ParentCommentId
         );
     }

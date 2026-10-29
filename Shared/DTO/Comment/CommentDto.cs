@@ -6,5 +6,6 @@ public record CommentDto(
     int UserId,
     string Username,
     int PostId,
+    DateTimeOffset CreatedAt,
     int? ParentCommentId
 );
