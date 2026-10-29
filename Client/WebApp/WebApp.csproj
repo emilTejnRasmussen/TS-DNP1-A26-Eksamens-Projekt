@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="LucideBlazor" Version="1.0.6" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
     </ItemGroup>
 
 </Project>

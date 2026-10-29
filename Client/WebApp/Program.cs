@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using WebApp.Authentication;
 using WebApp.Components;
@@ -9,23 +10,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Blazor authentication
-builder.Services.AddAuthorizationCore();
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "yap.auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+        options.LoginPath = "/login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+        options.SlidingExpiration = false;
+    });
+
+builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddScoped<TokenStore>();
+// API client for login and registration HTTP endpoints.
+builder.Services.AddHttpClient("api", client => { client.BaseAddress = new Uri("http://localhost:5092"); });
 
-builder.Services.AddScoped<JwtAuthenticationStateProvider>();
-
-builder.Services.AddScoped<AuthenticationStateProvider>(sp => 
-    sp.GetRequiredService<JwtAuthenticationStateProvider>());
-
-
+// API client for interactive Blazor components.
 builder.Services.AddScoped(sp =>
 {
-    var tokenStore = sp.GetRequiredService<TokenStore>();
+    var authProvider =
+        sp.GetRequiredService<AuthenticationStateProvider>();
 
-    var handler = new AuthTokenHandler(tokenStore)
+    var handler = new AuthTokenHandler(authProvider)
     {
         InnerHandler = new HttpClientHandler()
     };
@@ -36,10 +47,6 @@ builder.Services.AddScoped(sp =>
     };
 });
 
-// Authentication service
-builder.Services.AddScoped<IAuthService, HttpAuthService>();
-
-// Existing HTTP services
 builder.Services.AddScoped<IUserService, HttpUserService>();
 builder.Services.AddScoped<IPostService, HttpPostService>();
 builder.Services.AddScoped<ICommentService, HttpCommentService>();
@@ -55,13 +62,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStatusCodePagesWithReExecute(
     "/not-found",
-    createScopeForStatusCodePages: true
-);
+    createScopeForStatusCodePages: true);
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+app.MapSessionEndpoints();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,19 +1,29 @@
 ﻿using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace WebApp.Authentication;
 
-public class AuthTokenHandler(TokenStore tokenStore) : DelegatingHandler
+public class AuthTokenHandler(AuthenticationStateProvider authenticationStateProvider) : DelegatingHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(
+    protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(tokenStore.Token))
+        var state = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = state.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", tokenStore.Token);
+            var token = user.FindFirst("api_token")?.Value;
+
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
-        return base.SendAsync(request, cancellationToken);
+        return await base.SendAsync(request, cancellationToken);
     }
 }

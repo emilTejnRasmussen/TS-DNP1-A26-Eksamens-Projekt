@@ -1,9 +1,6 @@
 ﻿
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
-@using WebApp.Services.Interfaces
-@inject IAuthService AuthService
-@inject NavigationManager Navigation
 
 <div class="nav-container">
 
@@ -54,12 +51,14 @@
     <div class="account-footer">
         <AuthorizeView>
             <Authorized>
-                <button type="button"
-                        class="footer-action"
-                        @onclick="Logout">
-                    <LucideIcon Name="log-out" Size="17" />
-                    <span>Log out</span>
-                </button>
+                <form method="post" action="/session/logout">
+                    <AntiforgeryToken />
+
+                    <button type="submit" class="footer-action">
+                        <LucideIcon Name="log-out" Size="17" />
+                        <span>Log out</span>
+                    </button>
+                </form>
             </Authorized>
 
             <NotAuthorized>
@@ -77,11 +76,3 @@
     </div>
 
 </div>
-
-@code {
-    private void Logout()
-    {
-        AuthService.Logout();
-        Navigation.NavigateTo("/");
-    }
-}

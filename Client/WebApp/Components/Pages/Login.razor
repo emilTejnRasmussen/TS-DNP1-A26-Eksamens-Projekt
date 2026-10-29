@@ -1,8 +1,5 @@
-﻿@page "/login"
-@using DTO.Auth
-@using WebApp.Services.Interfaces
-@inject IAuthService AuthService
-@inject NavigationManager Navigation
+﻿
+@page "/login"
 
 <PageTitle>Log in | yap.</PageTitle>
 
@@ -14,27 +11,27 @@
     </div>
 
     <div class="auth-card">
-        <form @onsubmit="LoginAsync" @onsubmit:preventDefault>
+        <form method="post" action="/session/login" data-enhance="false">
+            <AntiforgeryToken />
+
             <div class="auth-field">
                 <label for="login-username">Username</label>
                 <input id="login-username"
+                       name="username"
                        type="text"
                        autocomplete="username"
                        placeholder="Your username"
-                       @bind="username"
-                       required
-                       disabled="@isSubmitting" />
+                       required />
             </div>
 
             <div class="auth-field">
                 <label for="login-password">Password</label>
                 <input id="login-password"
+                       name="password"
                        type="password"
                        autocomplete="current-password"
                        placeholder="Your password"
-                       @bind="password"
-                       required
-                       disabled="@isSubmitting" />
+                       required />
             </div>
 
             @if (errorMessage is not null)
@@ -42,10 +39,8 @@
                 <p class="auth-error" role="alert">@errorMessage</p>
             }
 
-            <button class="auth-submit"
-                    type="submit"
-                    disabled="@isSubmitting">
-                @(isSubmitting ? "Logging in..." : "Log in")
+            <button class="auth-submit" type="submit">
+                Log in
                 <LucideIcon Name="arrow-right" Size="17" />
             </button>
         </form>
@@ -58,36 +53,18 @@
 </div>
 
 @code {
-    private string username = "";
-    private string password = "";
+    [SupplyParameterFromQuery(Name = "error")]
+    private string? Error { get; set; }
+
     private string? errorMessage;
-    private bool isSubmitting;
 
-    private async Task LoginAsync()
+    protected override void OnParametersSet()
     {
-        if (isSubmitting)
-            return;
-
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
+        errorMessage = Error switch
         {
-            await AuthService.LoginAsync(
-                new LoginRequest(username.Trim(), password)
-            );
-
-            Navigation.NavigateTo("/");
-        }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
-                ? "Incorrect username or password."
-                : "Couldn't log you in. Please try again.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
+            "invalid" => "Incorrect username or password.",
+            "server" => "Couldn't log you in. Please try again.",
+            _ => null
+        };
     }
 }
