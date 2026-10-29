@@ -7,10 +7,7 @@ public static class UserMapper
 {
     public static User ToEntity(CreateUserDto dto)
     {
-        return new User(
-            dto.Username,
-            dto.Password
-        );
+        return new User(dto.Username);
     }
 
     public static UserDto ToDto(User user)

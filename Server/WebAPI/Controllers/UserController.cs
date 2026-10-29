@@ -9,15 +9,6 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class UsersController(IUserRepository userRepo) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> AddUser([FromBody] CreateUserDto request)
-    {
-        var user = UserMapper.ToEntity(request);
-        var createdUser = await userRepo.AddAsync(user);
-
-        return Created($"/users/{createdUser.Id}", UserMapper.ToDto(createdUser));
-    }
-
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUser([FromRoute] int id)
     {
@@ -51,7 +42,7 @@ public class UsersController(IUserRepository userRepo) : ControllerBase
         var userToUpdate = await userRepo.GetSingleAsync(id);
 
         userToUpdate.Username = request.Username;
-        userToUpdate.Password = request.Password;
+        userToUpdate.hashedPassword = request.Password;
 
         await userRepo.UpdateAsync(userToUpdate);
 

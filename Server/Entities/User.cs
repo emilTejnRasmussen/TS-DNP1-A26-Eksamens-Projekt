@@ -1,8 +1,8 @@
 ﻿namespace Entities;
 
-public class User(string username, string password) : IEntity
+public class User(string username) : IEntity
 {
     public int Id { get; set; }
     public string Username { get; set; } = username;
-    public string Password { get; set; } = password;
+    public string hashedPassword { get; set; }
 }

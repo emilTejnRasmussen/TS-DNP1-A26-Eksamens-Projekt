@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
+using Entities;
 using FileRepositories;
+using Microsoft.AspNetCore.Identity;
 using RepositoryContract;
 using Services;
 using Services.Interfaces;
@@ -29,6 +31,9 @@ builder.Services.AddScoped<IUserRepository, UserFileRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IPostVoteService, PostVoteService>();
 builder.Services.AddScoped<ICommentVoteService, CommentVoteService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

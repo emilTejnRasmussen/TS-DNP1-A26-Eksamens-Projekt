@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
 using RepositoryContract.Exceptions;
+using Services.Exceptions;
 
 namespace WebApi.ExceptionHandlers;
 
@@ -10,21 +12,29 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is EntityNotFoundException)
+        var statusCode = exception switch
         {
-            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            EntityNotFoundException => StatusCodes.Status404NotFound,
+            UsernameAlreadyExistsException => StatusCodes.Status409Conflict,
+            InvalidCredentialsException => StatusCodes.Status401Unauthorized,
+            _ => 0
+        };
 
-            await httpContext.Response.WriteAsJsonAsync(
-                new
-                {
-                    error = exception.Message
-                },
-                cancellationToken
-            );
-
-            return true;
+        if (statusCode == 0)
+        {
+            return false;
         }
 
-        return false;
+        httpContext.Response.StatusCode = statusCode;
+
+        await httpContext.Response.WriteAsJsonAsync(
+            new
+            {
+                error = exception.Message
+            },
+            cancellationToken
+        );
+
+        return true;
     }
 }
