@@ -1,15 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>WebApi</RootNamespace>
-    </PropertyGroup>
+      <UserSecretsId>230f96a0-3447-481a-8053-e7db35fa2706</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
     </ItemGroup>
 
     <ItemGroup>
