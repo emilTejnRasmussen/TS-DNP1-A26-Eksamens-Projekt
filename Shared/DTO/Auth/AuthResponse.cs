@@ -1,3 +1,5 @@
 ﻿namespace DTO.Auth;
 
-public record AuthResponse();
+public record AuthResponse(
+    string token
+);

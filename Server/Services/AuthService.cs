@@ -12,11 +12,12 @@ namespace Services;
 
 public class AuthService(
     IUserRepository userRepo,
-    IPasswordHasher<User> passwordHasher) : IAuthService
+    IPasswordHasher<User> passwordHasher,
+    ITokenService tokenService) : IAuthService
 { 
     public async Task<UserDto> RegisterAsync(RegisterRequest request)
     {
-        EnsureUsernameDoNotExist(request.Username);
+        await EnsureUsernameDoNotExist(request.Username);
 
         var user = new User(request.Username);
 
@@ -29,25 +30,26 @@ public class AuthService(
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await userRepo.GetByUsernameAsync(request.Username);
+        var user = await userRepo.GetByUsernameAsync(request.Username)
+                   ?? throw new InvalidCredentialsException();
 
-        if (user is null)
-        {
-            throw new InvalidCredentialsException();
-        }
+        EnsureValidPassword(user, request.Password);
 
-        var authResult = passwordHasher.VerifyHashedPassword(
+        return new AuthResponse(tokenService.GenerateToken(user));
+    }
+
+    private void EnsureValidPassword(User user, string password)
+    {
+        var result = passwordHasher.VerifyHashedPassword(
             user,
             user.hashedPassword,
-            request.Password
+            password
         );
 
-        if (authResult == PasswordVerificationResult.Failed)
+        if (result == PasswordVerificationResult.Failed)
         {
             throw new InvalidCredentialsException();
         }
-        
-        
     }
     
     private async Task EnsureUsernameDoNotExist(string username)
