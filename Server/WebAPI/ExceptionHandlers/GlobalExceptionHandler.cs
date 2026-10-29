@@ -17,6 +17,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             EntityNotFoundException => StatusCodes.Status404NotFound,
             UsernameAlreadyExistsException => StatusCodes.Status409Conflict,
             InvalidCredentialsException => StatusCodes.Status401Unauthorized,
+            InvalidCurrentPasswordException => StatusCodes.Status400BadRequest,
             _ => 0
         };
 

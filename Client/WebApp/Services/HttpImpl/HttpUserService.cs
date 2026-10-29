@@ -39,7 +39,7 @@ public class HttpUserService(HttpClient client) : IUserService
         return (await response.Content.ReadFromJsonAsync<List<UserDto>>())!;
     }
 
-    public async Task UpdateUserAsync(int id, UpdateUserDto request)
+    public async Task UpdateUserAsync(int id, UpdateUserRequest request)
     {
         var response = await client.PatchAsJsonAsync($"users/{id}", request);
 
