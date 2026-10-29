@@ -4,6 +4,9 @@
 @using DTO.CommentVote
 @using Entities
 @using WebApp.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 @inject ICommentService CommentService
 
 <article class="comment">
@@ -60,10 +63,9 @@
         <div class="reply-form">
             <CommentForm
                 PostId="@Comment.PostId"
-                UserId="@UserId"
                 ParentCommentId="@Comment.Id"
                 OnCommentAdded="HandleReplyAddedAsync"
-                OnCancel="CloseReply"/>
+                OnCancel="CloseReply" />
         </div>
     }
 </article>
@@ -71,9 +73,6 @@
 @code {
     [Parameter, EditorRequired] 
     public required CommentDto Comment { get; set; }
-
-    [Parameter, EditorRequired] 
-    public int UserId { get; set; }
 
     [Parameter] 
     public EventCallback OnCommentAdded { get; set; }
@@ -89,8 +88,16 @@
 
     private bool isReplying;
 
-    private void ToggleReply()
+    private async void ToggleReply()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        
         isReplying = !isReplying;
     }
 
@@ -110,13 +117,21 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
+        votes = await CommentService.GetVotesAsync(Comment.Id);
     }
 
     private async Task VoteAsync(VoteType voteType)
     {
         if (isVoting)
             return;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
 
         isVoting = true;
 
@@ -126,7 +141,7 @@
 
             await CommentService.AddVoteAsync(Comment.Id, dto);
 
-            votes = await CommentService.GetVotesAsync(Comment.Id, UserId);
+            votes = await CommentService.GetVotesAsync(Comment.Id);
         }
         finally
         {

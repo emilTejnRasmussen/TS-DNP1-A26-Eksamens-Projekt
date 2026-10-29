@@ -67,12 +67,9 @@ public class HttpCommentService(HttpClient client) : ICommentService
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public async Task<CommentVoteSummaryDto> GetVotesAsync(int commentId, int? userId = null)
+    public async Task<CommentVoteSummaryDto> GetVotesAsync(int commentId)
     {
         var url = $"comments/{commentId}/votes";
-
-        if (userId.HasValue)
-            url += $"?userId={userId.Value}";
 
         var response = await client.GetAsync(url);
 

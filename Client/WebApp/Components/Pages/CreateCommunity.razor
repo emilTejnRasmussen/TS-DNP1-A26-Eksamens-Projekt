@@ -2,6 +2,8 @@
 @using DTO.Subforum
 @using WebApp.Services.Interfaces
 @using WebApp.Components.Community
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 @inject ISubforumService SubforumService
 @inject NavigationManager Navigation
 
@@ -44,7 +46,7 @@
                 Name="@name"
                 Description="@description"
                 @bind-Color="color"
-                @bind-Symbol="symbol" />
+                @bind-Symbol="symbol"/>
 
             @if (errorMessage is not null)
             {
@@ -66,17 +68,34 @@
     private string color = "#E78570";
     private string symbol = "messages-square";
 
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+        }
+    }
+    
     private async Task CreateAsync()
     {
         if (isSubmitting)
             return;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
 
         isSubmitting = true;
         errorMessage = null;
 
         try
         {
-            // Temporary user ID until Assignment 6 adds login.
             var request = new CreateSubforumDto(
                 name.Trim(),
                 description.Trim(),
@@ -84,13 +103,22 @@
                 symbol
             );
 
-            await SubforumService.AddSubforumAsync(request);
+            var created = await SubforumService.AddSubforumAsync(request);
 
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo($"/communities/{created.Id}");
         }
         catch (HttpRequestException ex)
         {
-            errorMessage = ex.Message;
+            errorMessage = ex.StatusCode switch
+            {
+                System.Net.HttpStatusCode.Unauthorized =>
+                    "Your session has expired. Please log in again.",
+
+                System.Net.HttpStatusCode.Forbidden =>
+                    "You don't have permission to create a community.",
+
+                _ => "Couldn't create your community. Please try again."
+            };
         }
         finally
         {

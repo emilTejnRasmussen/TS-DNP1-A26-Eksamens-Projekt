@@ -3,7 +3,6 @@
 <div class="comment-thread">
     <CommentCard
         Comment="@Comment"
-        UserId="@UserId"
         OnCommentAdded="@OnCommentAdded"
         HasReplies="@(Replies.Count > 0)"
         IsCollapsed="@isCollapsed"
@@ -18,7 +17,6 @@
                     @key="reply.Id"
                     Comment="@reply"
                     AllComments="@AllComments"
-                    UserId="@UserId"
                     OnCommentAdded="@OnCommentAdded"
                     Depth="@(Depth + 1)" />
             }
@@ -32,9 +30,6 @@
 
     [Parameter, EditorRequired]
     public required IReadOnlyList<CommentDto> AllComments { get; set; }
-
-    [Parameter, EditorRequired]
-    public int UserId { get; set; }
 
     [Parameter]
     public EventCallback OnCommentAdded { get; set; }

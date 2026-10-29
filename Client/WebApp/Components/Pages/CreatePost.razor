@@ -3,6 +3,8 @@
 @using DTO.Posts
 @using DTO.Subforum
 @using WebApp.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IPostService PostService
 @inject ISubforumService SubforumService
 @inject NavigationManager Navigation
@@ -142,6 +144,14 @@
         if (!CanSubmit || community is null)
             return;
 
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (state.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        
         isSubmitting = true;
         errorMessage = null;
 

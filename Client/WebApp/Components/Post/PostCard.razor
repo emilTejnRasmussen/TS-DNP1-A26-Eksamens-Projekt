@@ -3,6 +3,8 @@
 @using Entities
 @using WebApp.Components.Voting
 @using WebApp.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IPostService PostService
 @inject NavigationManager Navigation
 
@@ -66,7 +68,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        votes = await PostService.GetVotesAsync(Post.Id, 1);
+        votes = await PostService.GetVotesAsync(Post.Id);
     }
     private bool isVoting;
 
@@ -74,6 +76,14 @@
     {
         if (isVoting)
             return;
+        
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (state.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
 
         isVoting = true;
 
@@ -83,7 +93,7 @@
 
             await PostService.AddVoteAsync(Post.Id, dto);
 
-            votes = await PostService.GetVotesAsync(Post.Id, 1);
+            votes = await PostService.GetVotesAsync(Post.Id);
         }
         finally
         {

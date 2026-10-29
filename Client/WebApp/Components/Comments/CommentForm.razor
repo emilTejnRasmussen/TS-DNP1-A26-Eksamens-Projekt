@@ -1,7 +1,12 @@
 ﻿
 @using DTO.Comment
+@using Microsoft.AspNetCore.Components.Authorization
 @using WebApp.Services.Interfaces
+
 @inject IPostService PostService
+@inject ICommentService CommentService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <div class="comment-form @(ParentCommentId.HasValue ? "compact" : "")">
     @if (!ParentCommentId.HasValue)
@@ -33,11 +38,10 @@
             </button>
         }
 
-        <button
-            type="button"
-            class="submit-button"
-            disabled="@(isSubmitting || string.IsNullOrWhiteSpace(body))"
-            @onclick="SubmitAsync">
+        <button type="button"
+                class="submit-button"
+                disabled="@(isSubmitting || string.IsNullOrWhiteSpace(body))"
+                @onclick="SubmitAsync">
 
             <LucideIcon Name="send" Size="16" />
 
@@ -59,9 +63,6 @@
     [Parameter, EditorRequired]
     public int PostId { get; set; }
 
-    [Parameter, EditorRequired]
-    public int UserId { get; set; }
-
     [Parameter]
     public int? ParentCommentId { get; set; }
 
@@ -80,22 +81,48 @@
         if (string.IsNullOrWhiteSpace(body) || isSubmitting)
             return;
 
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
         isSubmitting = true;
         errorMessage = null;
 
         try
         {
-            var dto = new CreateCommentDto(body.Trim(), ParentCommentId);
+            if (ParentCommentId.HasValue)
+            {
+                var request = new CreateReplyDto(body.Trim());
 
-            await PostService.AddCommentAsync(PostId, dto);
+                await CommentService.ReplyAsync(
+                    ParentCommentId.Value,
+                    request
+                );
+            }
+            else
+            {
+                var request = new CreateCommentDto(
+                    body.Trim(),
+                    null
+                );
+
+                await PostService.AddCommentAsync(PostId, request);
+            }
 
             body = "";
 
             await OnCommentAdded.InvokeAsync();
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
-            errorMessage = "Couldn't post your comment. Please try again.";
+            errorMessage = ex.StatusCode ==
+                System.Net.HttpStatusCode.Unauthorized
+                    ? "Your session has expired. Please log in again."
+                    : "Couldn't post your comment. Please try again.";
         }
         finally
         {

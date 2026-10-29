@@ -5,15 +5,6 @@ namespace WebApp.Services.HttpImpl;
 
 public class HttpUserService(HttpClient client) : IUserService
 {
-    public async Task<UserDto> AddUserAsync(CreateUserDto request)
-    {
-        var response = await client.PostAsJsonAsync("users", request);
-
-        await HttpResponseHelper.EnsureSuccessAsync(response);
-
-        return (await response.Content.ReadFromJsonAsync<UserDto>())!;
-    }
-
     public async Task<UserDto> GetUserAsync(int id)
     {
         var response = await client.GetAsync($"users/{id}");
@@ -39,16 +30,26 @@ public class HttpUserService(HttpClient client) : IUserService
         return (await response.Content.ReadFromJsonAsync<List<UserDto>>())!;
     }
 
-    public async Task UpdateUserAsync(int id, UpdateUserRequest request)
+    public async Task UpdateUserAsync(UpdateUserRequest request)
     {
-        var response = await client.PatchAsJsonAsync($"users/{id}", request);
+        var response = await client.PatchAsJsonAsync($"users/me", request);
+
+        await HttpResponseHelper.EnsureSuccessAsync(response);
+    }
+    
+    public async Task ChangePasswordAsync(ChangePasswordRequest request)
+    {
+        var response = await client.PutAsJsonAsync(
+            "users/me/password",
+            request
+        );
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public async Task DeleteUserAsync(int id)
+    public async Task DeleteUserAsync()
     {
-        var response = await client.DeleteAsync($"users/{id}");
+        var response = await client.DeleteAsync($"users/me");
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }

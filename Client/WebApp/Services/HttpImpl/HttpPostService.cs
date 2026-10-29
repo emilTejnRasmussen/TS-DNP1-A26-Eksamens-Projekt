@@ -92,17 +92,13 @@ public class HttpPostService(HttpClient client) : IPostService
         await HttpResponseHelper.EnsureSuccessAsync(response);
     }
 
-    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId, int? userId = null)
+    public async Task<PostVoteSummaryDto> GetVotesAsync(int postId)
     {
-        var url = $"posts/{postId}/votes";
-
-        if (userId.HasValue)
-            url += $"?userId={userId.Value}";
-
-        var response = await client.GetAsync(url);
+        var response = await client.GetAsync($"posts/{postId}/votes");
 
         await HttpResponseHelper.EnsureSuccessAsync(response);
 
-        return (await response.Content.ReadFromJsonAsync<PostVoteSummaryDto>())!;
+        return (await response.Content
+            .ReadFromJsonAsync<PostVoteSummaryDto>())!;
     }
 }
