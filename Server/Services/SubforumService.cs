@@ -18,7 +18,7 @@ public class SubforumService(
         return SubforumMapper.ToDto(createdSubforum, 0);
     }
 
-    public async Task<List<SubforumDto>> GetManyAsync(string? nameContains, int? creatorId = null)
+    public async Task<List<SubforumDto>> GetManyAsync(string? nameContains = null, int? creatorId = null)
     {
         var subforums = subforumRepo.GetMany();
 
