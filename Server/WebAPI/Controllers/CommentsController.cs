@@ -12,11 +12,13 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class CommentsController(
     ICommentRepository commentRepo,
-    ICommentVoteService commentVoteService) : ControllerBase
+    ICommentVoteService commentVoteService,
+    IUserRepository userRepo) : ControllerBase
 {
     [HttpPost("{commentId:int}/replies")]
     public async Task<IActionResult> Reply([FromRoute] int commentId, [FromBody] CreateReplyDto request)
     {
+        var user = await userRepo.GetSingleAsync(request.UserId);
         var parentComment = await commentRepo.GetSingleAsync(commentId);
 
         var reply = new Comment(
@@ -28,24 +30,25 @@ public class CommentsController(
 
         var createdReply = await commentRepo.AddAsync(reply);
 
-        return Created($"/comments/{createdReply.Id}", CommentMapper.ToDto(createdReply));
+        return Created($"/comments/{createdReply.Id}", CommentMapper.ToDto(createdReply, user.Username));
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetComment([FromRoute] int id)
     {
         var comment = await commentRepo.GetSingleAsync(id);
+        var user = await userRepo.GetSingleAsync(comment.UserId);
 
-        return Ok(CommentMapper.ToDto(comment));
+        return Ok(CommentMapper.ToDto(comment, user.Username));
     }
     
     [HttpGet]
-    public IActionResult GetComments(
+    public async Task<IActionResult> GetComments(
         [FromQuery] int? userId = null,
         [FromQuery] int? postId = null)
     {
         var comments = commentRepo.GetMany();
-
+        
         if (userId.HasValue)
         {
             comments = comments.Where(c => c.UserId == userId.Value);
@@ -56,10 +59,13 @@ public class CommentsController(
             comments = comments.Where(c => c.PostId == postId.Value);
         }
 
-        var dtos = comments
-            .AsEnumerable()
-            .Select(CommentMapper.ToDto)
-            .ToList();
+        var dtos = new List<CommentDto>();
+        
+        foreach (var comment in comments)
+        {
+            var user = await userRepo.GetSingleAsync(comment.UserId);
+            dtos.Add(CommentMapper.ToDto(comment, user.Username));
+        }
 
         return Ok(dtos);
     }

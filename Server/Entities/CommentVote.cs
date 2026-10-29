@@ -1,4 +1,6 @@
-﻿namespace Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Entities;
 
 public class CommentVote(int userId, int commentId, VoteType voteType) : IEntity
 {

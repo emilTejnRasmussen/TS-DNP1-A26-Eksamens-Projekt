@@ -20,13 +20,23 @@ public class PostService(
 
         List<CommentDto>? comments = null;
 
-        if (includeComments)
+        if (!includeComments)
+            return PostMapper.ToDetailsDto(
+                post,
+                user.Username,
+                subforum.Name,
+                comments
+            );
+        
+        var postComments = commentRepo.GetMany()
+            .Where(c => c.PostId == id);
+
+        comments = [];
+
+        foreach (var comment in postComments)
         {
-            comments = commentRepo.GetMany()
-                .Where(c => c.PostId == id)
-                .AsEnumerable()
-                .Select(CommentMapper.ToDto)
-                .ToList();
+            var commentUser = await userRepo.GetSingleAsync(comment.UserId);
+            comments.Add(CommentMapper.ToDto(comment, commentUser.Username));
         }
 
         return PostMapper.ToDetailsDto(
