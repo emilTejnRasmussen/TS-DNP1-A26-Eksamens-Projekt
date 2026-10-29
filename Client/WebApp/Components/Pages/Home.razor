@@ -1,12 +1,20 @@
-﻿@page "/"
+﻿
+@page "/"
+@using DTO.Posts
 @using DTO.Subforum
 @using WebApp.Services.Interfaces
 @using WebApp.Components.Community
+@using WebApp.Components.Post
+
 @inject ISubforumService SubforumService
+@inject IPostService PostService
 
 <PageTitle>Discover | yap.</PageTitle>
 
 <div class="home">
+
+    <!-- Welcome -->
+
     <section class="welcome">
         <div class="welcome-copy">
             <span class="eyebrow">✳ HELLO, STRANGER</span>
@@ -27,18 +35,82 @@
         </div>
     </section>
 
+    <!-- Latest conversations -->
+
+    <section class="latest-posts">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">FRESH OFF THE PRESS</span>
+                <h2>
+                    Latest conversations<span class="heading-dot">.</span>
+                </h2>
+            </div>
+
+            @if (latestPosts is not null && latestPosts.Count > 0)
+            {
+                <span class="community-count">
+                    @latestPosts.Count recent
+                    @(latestPosts.Count == 1 ? "post" : "posts")
+                </span>
+            }
+        </div>
+
+        @if (postsError is not null)
+        {
+            <div class="feedback">
+                <h3>Couldn't load conversations.</h3>
+                <p>@postsError</p>
+
+                <button type="button" @onclick="LoadPostsAsync">
+                    Try again
+                </button>
+            </div>
+        }
+        else if (latestPosts is null)
+        {
+            <p class="loading">Finding the latest conversations...</p>
+        }
+        else if (latestPosts.Count == 0)
+        {
+            <div class="feedback">
+                <h3>Nothing here just yet.</h3>
+                <p>
+                    The first conversations are still waiting to happen.
+                    Why not start one?
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="latest-posts-list">
+                @foreach (var post in latestPosts)
+                {
+                    <PostCard
+                        @key="post.Id"
+                        Post="post"
+                        AccentColor="@GetPostAccent(post.SubforumId)" />
+                }
+            </div>
+        }
+    </section>
+
+    <!-- Communities -->
+
     <section id="communities" class="communities">
         <div class="section-heading">
             <div>
                 <span class="eyebrow">A PLACE FOR EVERY INTEREST</span>
-                <h2>Explore communities<span class="heading-dot">.</span></h2>
+                <h2>
+                    Explore communities<span class="heading-dot">.</span>
+                </h2>
             </div>
 
             <div class="heading-actions">
                 @if (subforums is not null)
                 {
                     <span class="community-count">
-                        @subforums.Count @(subforums.Count == 1 ? "community" : "communities")
+                        @subforums.Count
+                        @(subforums.Count == 1 ? "community" : "communities")
                     </span>
                 }
 
@@ -48,12 +120,15 @@
             </div>
         </div>
 
-        @if (errorMessage is not null)
+        @if (communitiesError is not null)
         {
             <div class="feedback">
                 <h3>Couldn't load communities.</h3>
-                <p>@errorMessage</p>
-                <button @onclick="LoadSubforumsAsync">Try again</button>
+                <p>@communitiesError</p>
+
+                <button type="button" @onclick="LoadSubforumsAsync">
+                    Try again
+                </button>
             </div>
         }
         else if (subforums is null)
@@ -72,11 +147,15 @@
             <div class="community-grid">
                 @foreach (var subforum in subforums)
                 {
-                    <CommunityCard Community="subforum" @key="subforum.Id" />
+                    <CommunityCard
+                        @key="subforum.Id"
+                        Community="subforum" />
                 }
             </div>
         }
     </section>
+
+    <!-- Footer -->
 
     <footer class="home-footer">
         <span>✳ a little community goes a long way.</span>
@@ -85,17 +164,49 @@
 </div>
 
 @code {
+    private const int LatestPostCount = 6;
+
+    private List<PostDto>? latestPosts;
     private List<SubforumDto>? subforums;
-    private string? errorMessage;
+
+    private string? postsError;
+    private string? communitiesError;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSubforumsAsync();
+        await Task.WhenAll(
+            LoadPostsAsync(),
+            LoadSubforumsAsync()
+        );
+    }
+
+    private async Task LoadPostsAsync()
+    {
+        postsError = null;
+        latestPosts = null;
+
+        try
+        {
+            var posts = await PostService.GetPostsAsync();
+
+            latestPosts = posts
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(LatestPostCount)
+                .ToList();
+        }
+        catch (HttpRequestException)
+        {
+            postsError = "Please check that the Web API is running.";
+        }
+        catch (Exception)
+        {
+            postsError = "An unexpected error occurred.";
+        }
     }
 
     private async Task LoadSubforumsAsync()
     {
-        errorMessage = null;
+        communitiesError = null;
         subforums = null;
 
         try
@@ -104,11 +215,18 @@
         }
         catch (HttpRequestException)
         {
-            errorMessage = "Please check that the Web API is running.";
+            communitiesError = "Please check that the Web API is running.";
         }
         catch (Exception)
         {
-            errorMessage = "An unexpected error occurred.";
+            communitiesError = "An unexpected error occurred.";
         }
+    }
+
+    private string GetPostAccent(int subforumId)
+    {
+        return subforums?
+            .FirstOrDefault(s => s.Id == subforumId)?
+            .Color ?? "var(--coral)";
     }
 }

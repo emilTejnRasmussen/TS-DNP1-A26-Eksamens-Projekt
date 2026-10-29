@@ -16,7 +16,8 @@ public static class PostMapper
             username,
             post.SubforumId,
             subforumName,
-            commentCount
+            commentCount,
+            post.CreatedAt
         );
     }
 

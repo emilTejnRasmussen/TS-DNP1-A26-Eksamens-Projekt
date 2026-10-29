@@ -8,5 +8,6 @@ public record PostDto(
     string Username,
     int SubforumId,
     string SubforumName,
-    int CommentCount
+    int CommentCount,
+    DateTimeOffset CreatedAt
 );
