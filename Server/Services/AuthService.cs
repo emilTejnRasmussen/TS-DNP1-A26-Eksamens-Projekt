@@ -1,8 +1,6 @@
 ﻿using DTO.Auth;
-using DTO.User;
 using Entities;
 using Exceptions;
-using Mapper;
 using Microsoft.AspNetCore.Identity;
 using RepositoryContract;
 using Services.Exceptions;
@@ -15,9 +13,9 @@ public class AuthService(
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
 { 
-    public async Task<UserDto> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        await EnsureUsernameDoNotExist(request.Username);
+        await EnsureUsernameDoesNotExistAsync(request.Username);
 
         var user = new User(request.Username);
 
@@ -25,7 +23,9 @@ public class AuthService(
 
         var createdUser = await userRepo.AddAsync(user);
 
-        return UserMapper.ToDto(createdUser);
+        var token = tokenService.GenerateToken(createdUser);
+
+        return new AuthResponse(token);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -35,7 +35,9 @@ public class AuthService(
 
         EnsureValidPassword(user, request.Password);
 
-        return new AuthResponse(tokenService.GenerateToken(user));
+        var token = tokenService.GenerateToken(user);
+
+        return new AuthResponse(token);
     }
 
     private void EnsureValidPassword(User user, string password)
@@ -52,7 +54,7 @@ public class AuthService(
         }
     }
     
-    private async Task EnsureUsernameDoNotExist(string username)
+    private async Task EnsureUsernameDoesNotExistAsync(string username)
     {
         var usernameAlreadyExists = await userRepo.UsernameAlreadyExistsAsync(username);
 
