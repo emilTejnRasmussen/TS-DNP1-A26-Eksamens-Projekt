@@ -1,0 +1,255 @@
+﻿
+@page "/users/{Id:int}"
+@using System.Security.Claims
+@using System.Net
+@using DTO.User
+@using DTO.Posts
+@using DTO.Comment
+@using DTO.Subforum
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebApp.Services.Interfaces
+@using WebApp.Components.Post
+@using WebApp.Components.Community
+@using WebApp.Helpers
+
+@inject IUserService UserService
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject ISubforumService SubforumService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>@(user is null ? "Profile" : $"u/{user.Username}") | yap.</PageTitle>
+
+<div class="profile-page">
+    @if (isLoading)
+    {
+        <div class="profile-feedback">Loading profile...</div>
+    }
+    else if (errorMessage is not null)
+    {
+        <div class="profile-feedback">
+            <h2>Couldn't load this profile.</h2>
+            <p>@errorMessage</p>
+            <a href="/">Back to discover</a>
+        </div>
+    }
+    else if (user is not null)
+    {
+        <header class="profile-header">
+            <span class="profile-eyebrow">✳ A LITTLE CORNER OF YAP.</span>
+
+            <div class="profile-heading">
+                <div class="profile-identity">
+                    <h1 title="@user.Username">
+                        <span>u/</span>@user.Username
+                    </h1>
+                    <p>Good conversations start with people.</p>
+                </div>
+
+                @if (isOwnProfile)
+                {
+                    <a class="edit-profile" href="/settings">
+                        <LucideIcon Name="settings-2" Size="16" />
+                        Edit profile
+                    </a>
+                }
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <strong>@posts.Count</strong>
+                    <span>Posts</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>@comments.Count</strong>
+                    <span>Comments</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>@communities.Count</strong>
+                    <span>Communities</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="profile-activity">
+            <div class="activity-heading">
+                <div>
+                    <span class="profile-eyebrow">THE THINGS WE SHARE</span>
+                    <h2>Activity<span>.</span></h2>
+                </div>
+            </div>
+
+            <div class="activity-tabs" role="group" aria-label="Profile activity">
+                <button class="@(activeTab == ProfileTab.Posts ? "active" : "")"
+                        aria-pressed="@(activeTab == ProfileTab.Posts)"
+                        @onclick="() => activeTab = ProfileTab.Posts">
+                    Posts
+                    <span>@posts.Count</span>
+                </button>
+
+                <button class="@(activeTab == ProfileTab.Comments ? "active" : "")"
+                        aria-pressed="@(activeTab == ProfileTab.Comments)"
+                        @onclick="() => activeTab = ProfileTab.Comments">
+                    Comments
+                    <span>@comments.Count</span>
+                </button>
+
+                <button class="@(activeTab == ProfileTab.Communities ? "active" : "")"
+                        aria-pressed="@(activeTab == ProfileTab.Communities)"
+                        @onclick="() => activeTab = ProfileTab.Communities">
+                    Communities
+                    <span>@communities.Count</span>
+                </button>
+            </div>
+
+            @if (activeTab == ProfileTab.Posts)
+            {
+                @if (posts.Count == 0)
+                {
+                    <div class="activity-empty">
+                        <LucideIcon Name="notebook-pen" Size="25" />
+                        <h3>No posts yet.</h3>
+                        <p>Nothing shared here just yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="profile-posts">
+                        @foreach (var post in posts)
+                        {
+                            <PostCard @key="post.Id" Post="post" />
+                        }
+                    </div>
+                }
+            }
+            else if (activeTab == ProfileTab.Comments)
+            {
+                @if (comments.Count == 0)
+                {
+                    <div class="activity-empty">
+                        <LucideIcon Name="message-circle" Size="25" />
+                        <h3>No comments yet.</h3>
+                        <p>Conversations will appear here.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="profile-comments">
+                        @foreach (var comment in comments.OrderByDescending(c => c.CreatedAt))
+                        {
+                            <a class="profile-comment"
+                               href="@($"/posts/{comment.PostId}")"
+                               @key="comment.Id">
+                                <div class="comment-meta">
+                                    <span>
+                                        <LucideIcon Name="message-circle" Size="14" />
+                                        Commented on a post
+                                    </span>
+                                    <time>@TimeFormatter.TimeAgo(comment.CreatedAt)</time>
+                                </div>
+
+                                <p>@comment.Body</p>
+
+                                <span class="comment-open">
+                                    View conversation
+                                    <LucideIcon Name="arrow-up-right" Size="15" />
+                                </span>
+                            </a>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                @if (communities.Count == 0)
+                {
+                    <div class="activity-empty">
+                        <LucideIcon Name="users-round" Size="25" />
+                        <h3>No communities yet.</h3>
+                        <p>There are plenty of places to explore.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="profile-communities">
+                        @foreach (var community in communities)
+                        {
+                            <CommunityCard @key="community.Id" Community="community" />
+                        }
+                    </div>
+                }
+            }
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UserDto? user;
+    private List<PostDto> posts = [];
+    private List<CommentDto> comments = [];
+    private List<SubforumDto> communities = [];
+
+    private bool isLoading = true;
+    private bool isOwnProfile;
+    private string? errorMessage;
+
+    private ProfileTab activeTab = ProfileTab.Posts;
+
+    private enum ProfileTab
+    {
+        Posts,
+        Comments,
+        Communities
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        user = null;
+        posts = [];
+        comments = [];
+        communities = [];
+        activeTab = ProfileTab.Posts;
+        isOwnProfile = false;
+
+        try
+        {
+            var userTask = UserService.GetUserAsync(Id);
+            var postsTask = PostService.GetPostsAsync(userId: Id);
+            var commentsTask = CommentService.GetCommentsAsync(userId: Id);
+            var communitiesTask = SubforumService.GetSubforumsAsync(creatorId: Id);
+
+            await Task.WhenAll(userTask, postsTask, commentsTask, communitiesTask);
+
+            user = await userTask;
+            posts = await postsTask;
+            comments = await commentsTask;
+            communities = await communitiesTask;
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            var currentUserId = authState.User.FindFirst(
+                ClaimTypes.NameIdentifier)?.Value;
+
+            isOwnProfile =
+                authState.User.Identity?.IsAuthenticated == true &&
+                currentUserId == Id.ToString();
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.StatusCode == HttpStatusCode.NotFound
+                ? "This user doesn't exist."
+                : "Please check that the Web API is running.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

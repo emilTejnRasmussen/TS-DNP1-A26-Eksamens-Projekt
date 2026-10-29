@@ -1,7 +1,9 @@
 ﻿using DTO.Comment;
 using DTO.Posts;
+using Entities;
 using Mapper;
 using RepositoryContract;
+using Services.Exceptions;
 using Services.Interfaces;
 
 namespace Services;
@@ -27,7 +29,7 @@ public class PostService(
                 subforum.Name,
                 comments
             );
-        
+
         var postComments = commentRepo.GetMany()
             .Where(c => c.PostId == id)
             .OrderByDescending(c => c.CreatedAt);
@@ -91,5 +93,50 @@ public class PostService(
         }
 
         return dtos;
+    }
+
+    public async Task<PostDto> CreatePostAsync(int userId, CreatePostDto request)
+    {
+        var user = await userRepo.GetSingleAsync(userId);
+        var subforum = await subforumRepo.GetSingleAsync(request.SubforumId);
+
+        var createdPost = await postRepo.AddAsync(PostMapper.ToEntity(request, userId));
+
+        return PostMapper.ToDto(
+            createdPost,
+            user.Username,
+            0,
+            subforum.Name
+        );
+    }
+
+    public async Task UpdatePostAsync(int userId, int postId, UpdatePostDto request)
+    {
+        var postToUpdate = await postRepo.GetSingleAsync(postId);
+
+        EnsureUserIsAuthor(userId, postToUpdate);
+        
+        postToUpdate.Title = request.Title;
+        postToUpdate.Body = request.Body;
+
+        await postRepo.UpdateAsync(postToUpdate);
+    }
+
+    public async Task DeleteAsync(int userId, int postId)
+    {
+        var postToDelete = await postRepo.GetSingleAsync(postId);
+        
+        EnsureUserIsAuthor(userId, postToDelete);
+
+        await postRepo.DeleteAsync(postId);
+    }
+
+
+    private void EnsureUserIsAuthor(int userId, Post post)
+    {
+        if (userId != post.UserId)
+        {
+            throw new ForbiddenOperationException("You are not allowed to modify this post.");
+        }
     }
 }

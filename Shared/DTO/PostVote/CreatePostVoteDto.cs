@@ -2,7 +2,4 @@
 
 namespace DTO.PostVote;
 
-public record CreatePostVoteDto(
-    int UserId,
-    VoteType VoteType
-);
+public record CreatePostVoteDto(VoteType VoteType);

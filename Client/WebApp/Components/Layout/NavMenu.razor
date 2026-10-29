@@ -1,16 +1,93 @@
-﻿<nav class="navigation">
-    <NavLink href="/" Match="NavLinkMatch.All">
-        <span class="nav-symbol">⌂</span>
-        Discover
-    </NavLink>
+﻿
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
-    <a href="/#communities">
-        <span class="nav-symbol">#</span>
-        Communities
-    </a>
-    
-    <NavLink href="/communities/create">
-        <span class="nav-symbol">+</span>
-        Create community
-    </NavLink>
-</nav>
+<div class="nav-container">
+
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <div class="user-welcome">
+                <div class="welcome-heading">
+                    <span>Hello,</span>
+                    <strong title="@auth.User.Identity?.Name">
+                        @auth.User.Identity?.Name!
+                    </strong>
+                </div>
+
+                <NavLink class="profile-link"
+                         href="@($"/users/{auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value}")"
+                         title="@($"u/{auth.User.Identity?.Name}")">
+                    u/@auth.User.Identity?.Name
+                </NavLink>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+
+    <div class="sidebar-section">
+        <span class="section-label">YOUR SPACE</span>
+
+        <nav class="navigation">
+            <NavLink href="/" Match="NavLinkMatch.All">
+                <span class="nav-symbol">⌂</span>
+                Discover
+            </NavLink>
+
+            <a href="/#communities">
+                <span class="nav-symbol">#</span>
+                Communities
+            </a>
+
+            <AuthorizeView>
+                <Authorized Context="auth">
+                    <NavLink href="/communities/create">
+                        <span class="nav-symbol">+</span>
+                        Create community
+                    </NavLink>
+
+                    <NavLink href="@($"/users/{auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value}")">
+                        <span class="nav-symbol">
+                            <LucideIcon Name="user-round" Size="18" />
+                        </span>
+                        Profile
+                    </NavLink>
+
+                    <NavLink href="/settings">
+                        <span class="nav-symbol">
+                            <LucideIcon Name="settings-2" Size="18" />
+                        </span>
+                        Settings
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
+        </nav>
+    </div>
+
+    <div class="account-footer">
+        <AuthorizeView>
+            <Authorized>
+                <form method="post"
+                      action="/session/logout"
+                      data-enhance="false">
+                    <AntiforgeryToken />
+
+                    <button type="submit" class="footer-action">
+                        <LucideIcon Name="log-out" Size="17" />
+                        <span>Log out</span>
+                    </button>
+                </form>
+            </Authorized>
+
+            <NotAuthorized>
+                <NavLink href="/login" class="footer-action">
+                    <LucideIcon Name="log-in" Size="17" />
+                    <span>Log in</span>
+                </NavLink>
+
+                <NavLink href="/register" class="footer-action">
+                    <LucideIcon Name="user-plus" Size="17" />
+                    <span>Join yap.</span>
+                </NavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>

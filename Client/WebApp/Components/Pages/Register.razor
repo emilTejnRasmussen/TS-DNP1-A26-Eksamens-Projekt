@@ -1,0 +1,84 @@
+﻿
+@page "/register"
+
+<PageTitle>Join yap.</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-heading">
+        <span class="auth-eyebrow">THERE'S ROOM FOR YOU ✳</span>
+        <h1>Come on in<span>.</span></h1>
+        <p>A little place for big conversations. Make yourself at home.</p>
+    </div>
+
+    <div class="auth-card">
+        <form method="post" action="/session/register" data-enhance="false">
+            <AntiforgeryToken />
+
+            <div class="auth-field">
+                <label for="register-username">Username</label>
+                <input id="register-username"
+                       name="username"
+                       type="text"
+                       autocomplete="username"
+                       placeholder="Pick a username"
+                       required />
+            </div>
+
+            <div class="auth-field">
+                <label for="register-password">Password</label>
+                <input id="register-password"
+                       name="password"
+                       type="password"
+                       autocomplete="new-password"
+                       placeholder="Create a password"
+                       minlength="8"
+                       required />
+            </div>
+
+            <div class="auth-field">
+                <label for="register-confirm">Confirm password</label>
+                <input id="register-confirm"
+                       name="confirmPassword"
+                       type="password"
+                       autocomplete="new-password"
+                       placeholder="One more time"
+                       required />
+            </div>
+
+            @if (errorMessage is not null)
+            {
+                <p class="auth-error" role="alert">
+                    @errorMessage
+                </p>
+            }
+
+            <button class="auth-submit" type="submit">
+                Create account
+                <LucideIcon Name="arrow-right" Size="17" />
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already part of yap.?
+            <a href="/login">Log in</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    private string? Error { get; set; }
+
+    private string? errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        errorMessage = Error switch
+        {
+            "mismatch" => "Passwords don't match.",
+            "taken" => "That username is already taken.",
+            "server" => "Couldn't create your account. Please try again.",
+            _ => null
+        };
+    }
+}

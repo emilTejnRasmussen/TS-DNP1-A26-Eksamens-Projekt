@@ -1,4 +1,86 @@
-﻿.navigation {
+﻿
+.nav-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* Greeting */
+
+.user-welcome {
+    min-width: 0;
+    margin-bottom: 34px;
+}
+
+.user-welcome ::deep .profile-link {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 8px;
+    padding-bottom: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    color: var(--coral);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+
+    border-bottom: 1px solid transparent;
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.user-welcome ::deep .profile-link:hover {
+    color: var(--text);
+    border-bottom-color: var(--coral);
+}
+
+.welcome-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+    color: var(--text);
+}
+
+.welcome-heading span {
+    flex-shrink: 0;
+}
+
+.welcome-heading strong {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 750;
+}
+
+.user-welcome ::deep .profile-link:hover {
+    border-color: var(--text);
+}
+
+/* Your space */
+
+.sidebar-section {
+    min-width: 0;
+}
+
+.section-label {
+    display: block;
+    margin-bottom: 16px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+}
+
+.navigation {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -29,16 +111,81 @@
 
 .nav-symbol {
     width: 18px;
+    flex-shrink: 0;
     font-size: 19px;
     text-align: center;
 }
 
+/* Bottom account actions */
+
+.account-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.account-footer ::deep a,
+.footer-action {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms, border-color 150ms;
+}
+
+.account-footer ::deep a:hover,
+.footer-action:hover {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.account-footer ::deep a.active {
+    background: var(--surface);
+    border-color: var(--text);
+}
+
+/* Mobile */
+
 @media (max-width: 850px) {
+    .nav-container {
+        flex: none;
+    }
+
+    .user-welcome {
+        margin: 16px 0 22px;
+    }
+
     .navigation {
         flex-direction: row;
+        flex-wrap: wrap;
     }
 
     .navigation ::deep a {
+        padding: 9px 12px;
+    }
+
+    .account-footer {
+        margin-top: 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .account-footer ::deep a,
+    .footer-action {
+        width: auto;
         padding: 9px 12px;
     }
 }

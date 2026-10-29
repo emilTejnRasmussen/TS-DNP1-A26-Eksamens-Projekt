@@ -8,4 +8,5 @@ public class Post(string title, string body, int userId, int subforumId) : IEnti
 
     public int UserId { get; set; } = userId;
     public int SubforumId { get; set; } = subforumId;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

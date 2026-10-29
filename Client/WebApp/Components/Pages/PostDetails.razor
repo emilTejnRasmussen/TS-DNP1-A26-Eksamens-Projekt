@@ -5,7 +5,10 @@
 @using WebApp.Components.Voting
 @using WebApp.Components.Comments
 @using WebApp.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IPostService PostService
+@inject NavigationManager Navigation
 
 <PageTitle>Post | yap.</PageTitle>
 
@@ -38,14 +41,17 @@
             <div class="post-body">@post.Body</div>
 
             <div class="post-actions">
-                <VotePill
-                    Likes="@votes.Likes"
-                    Dislikes="@votes.Dislikes"
-                    UserVote="@votes.UserVote"
-                    Compact="true"
-                    Disabled="@isVoting"
-                    OnUpvote="() => VoteAsync(VoteType.Like)"
-                    OnDownvote="() => VoteAsync(VoteType.Dislike)" />
+                @if (votes is not null)
+                {
+                    <VotePill
+                        Likes="@votes.Likes"
+                        Dislikes="@votes.Dislikes"
+                        UserVote="@votes.UserVote"
+                        Compact="true"
+                        Disabled="@isVoting"
+                        OnUpvote="() => VoteAsync(VoteType.Like)"
+                        OnDownvote="() => VoteAsync(VoteType.Dislike)"/>
+                }
 
                 <div class="comment-pill">
                     <LucideIcon Name="message-circle" Size="18"/>
@@ -60,11 +66,10 @@
                 <span>@(post.Comments?.Count ?? 0)</span>
             </div>
 
-            @* TODO: change UserId to logged ind user *@
+
             <CommentForm
                 PostId="@Id"
-                UserId="1"
-                OnCommentAdded="RefreshCommentsAsync"/>
+                OnCommentAdded="RefreshCommentsAsync" />
 
             @if (post.Comments is null || post.Comments.Count == 0)
             {
@@ -85,7 +90,6 @@
                             @key="comment.Id"
                             Comment="@comment"
                             AllComments="@post.Comments"
-                            UserId="1"
                             OnCommentAdded="RefreshCommentsAsync"/>
                     }
                 </div>
@@ -113,7 +117,7 @@
         try
         {
             var postTask = PostService.GetPostAsync(Id, includeComments: true);
-            var votesTask = PostService.GetVotesAsync(Id, 1);
+            var votesTask = PostService.GetVotesAsync(Id);
 
             await Task.WhenAll(postTask, votesTask);
 
@@ -145,16 +149,23 @@
         if (isVoting)
             return;
 
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (state.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
         isVoting = true;
 
         try
         {
-            // TODO Change to logged in user userId
-            var dto = new CreatePostVoteDto(1, voteType);
+            var dto = new CreatePostVoteDto(voteType);
 
             await PostService.AddVoteAsync(Id, dto);
 
-            votes = await PostService.GetVotesAsync(Id, 1);
+            votes = await PostService.GetVotesAsync(Id);
         }
         finally
         {

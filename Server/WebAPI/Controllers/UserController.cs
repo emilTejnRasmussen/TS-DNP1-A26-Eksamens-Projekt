@@ -1,67 +1,54 @@
 ﻿using DTO.User;
-using Mapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RepositoryContract;
+using Services.Interfaces;
+using WebApi.Authentication;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UsersController(IUserRepository userRepo) : ControllerBase
+public class UsersController(IUserService userService) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> AddUser([FromBody] CreateUserDto request)
-    {
-        var user = UserMapper.ToEntity(request);
-        var createdUser = await userRepo.AddAsync(user);
-
-        return Created($"/users/{createdUser.Id}", UserMapper.ToDto(createdUser));
-    }
-
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUser([FromRoute] int id)
     {
-        var user = await userRepo.GetSingleAsync(id);
-        return Ok(UserMapper.ToDto(user));
+        var response = await userService.GetUserAsync(id);
+        
+        return Ok(response);
     }
 
     [HttpGet]
     public IActionResult GetUsers([FromQuery] string? nameContains = null)
     {
-        var users = userRepo.GetMany();
-
-        if (!string.IsNullOrWhiteSpace(nameContains))
-        {
-            users = users.Where(u => u.Username.Contains(nameContains, StringComparison.OrdinalIgnoreCase));
-        }
-
-        var dtos = users
-            .AsEnumerable()
-            .Select(UserMapper.ToDto)
-            .ToList();
-
-        return Ok(dtos);
+        var response = userService.GetMany(nameContains);
+        
+        return Ok(response);
     }
 
-    [HttpPatch("{id:int}")]
-    public async Task<IActionResult> UpdateUser(
-        [FromRoute] int id,
-        [FromBody] UpdateUserDto request)
+    [Authorize]
+    [HttpPatch("me")]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
     {
-        var userToUpdate = await userRepo.GetSingleAsync(id);
-
-        userToUpdate.Username = request.Username;
-        userToUpdate.Password = request.Password;
-
-        await userRepo.UpdateAsync(userToUpdate);
+        await userService.UpdateUserAsync(User.GetUserId(), request);
 
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteUser([FromRoute] int id)
+    [Authorize]
+    [HttpPut("me/password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        await userRepo.DeleteAsync(id);
+        await userService.ChangePasswordAsync(User.GetUserId(), request);
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteUser()
+    {
+        await userService.DeleteAsync(User.GetUserId());
 
         return NoContent();
     }

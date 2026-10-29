@@ -14,5 +14,5 @@ public interface ICommentService
     Task DeleteCommentAsync(int id);
 
     Task AddVoteAsync(int commentId, CreateCommentVoteDto request);
-    Task<CommentVoteSummaryDto> GetVotesAsync(int commentId, int? userId = null);
+    Task<CommentVoteSummaryDto> GetVotesAsync(int commentId);
 }
