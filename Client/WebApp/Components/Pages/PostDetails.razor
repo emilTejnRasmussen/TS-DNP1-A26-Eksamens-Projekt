@@ -37,15 +37,15 @@
 
             <div class="post-actions">
                 <div class="vote-pill">
-                    <LucideIcon Name="arrow-big-up" Size="20" />
+                    <LucideIcon Name="arrow-big-up" Size="20"/>
                     <span>
                         @(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())
                     </span>
-                    <LucideIcon Name="arrow-big-down" Size="20" />
+                    <LucideIcon Name="arrow-big-down" Size="20"/>
                 </div>
 
                 <div class="comment-pill">
-                    <LucideIcon Name="message-circle" Size="18" />
+                    <LucideIcon Name="message-circle" Size="18"/>
                     <span>@(post.Comments?.Count ?? 0)</span>
                 </div>
             </div>
@@ -57,10 +57,16 @@
                 <span>@(post.Comments?.Count ?? 0)</span>
             </div>
 
+            @* TODO: change UserId to logged ind user *@
+            <CommentForm
+                PostId="@Id"
+                UserId="1"
+                OnCommentAdded="RefreshCommentsAsync"/>
+
             @if (post.Comments is null || post.Comments.Count == 0)
             {
                 <div class="empty-comments">
-                    <LucideIcon Name="message-circle" Size="24" />
+                    <LucideIcon Name="message-circle" Size="24"/>
                     <p>No comments yet.</p>
                     <span>Be the first to join the conversation.</span>
                 </div>
@@ -70,7 +76,7 @@
                 <div class="comments-list">
                     @foreach (var comment in post.Comments)
                     {
-                        <CommentCard @key="comment.Id" Comment="comment" />
+                        <CommentCard @key="comment.Id" Comment="comment"/>
                     }
                 </div>
             }
@@ -79,8 +85,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+    [Parameter] public int Id { get; set; }
 
     private PostDetailsDto? post;
     private PostVoteSummaryDto? votes;
@@ -114,4 +119,13 @@
             isLoading = false;
         }
     }
+
+    private async Task RefreshCommentsAsync()
+    {
+        post = await PostService.GetPostAsync(
+            Id,
+            includeComments: true
+        );
+    }
+
 }

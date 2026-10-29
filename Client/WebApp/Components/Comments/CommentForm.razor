@@ -1,0 +1,79 @@
+﻿@using DTO.Comment
+@using WebApp.Services.Interfaces
+@inject IPostService PostService
+
+<div class="comment-form">
+    <h3>Join the conversation.</h3>
+
+    <textarea
+        @bind="body"
+        @bind:event="oninput"
+        placeholder="What are your thoughts?"
+        disabled="@isSubmitting">
+    </textarea>
+
+    <div class="form-footer">
+        <span>Keep it friendly. Keep it yap.</span>
+
+        <button
+            type="button"
+            disabled="@(isSubmitting || string.IsNullOrWhiteSpace(body))"
+            @onclick="SubmitAsync">
+
+            <LucideIcon Name="send" Size="16" />
+            @(isSubmitting ? "Posting..." : "Post comment")
+        </button>
+    </div>
+
+    @if (errorMessage is not null)
+    {
+        <p class="form-error">@errorMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public int PostId { get; set; }
+
+    [Parameter, EditorRequired]
+    public int UserId { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentAdded { get; set; }
+
+    private string body = "";
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(body) || isSubmitting)
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var dto = new CreateCommentDto(
+                body.Trim(),
+                UserId,
+                null
+            );
+
+            await PostService.AddCommentAsync(PostId, dto);
+
+            body = "";
+
+            await OnCommentAdded.InvokeAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Couldn't post your comment. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
