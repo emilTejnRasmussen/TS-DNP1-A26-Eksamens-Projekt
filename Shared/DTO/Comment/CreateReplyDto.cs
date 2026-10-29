@@ -1,6 +1,8 @@
-﻿namespace DTO.Comment;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DTO.Comment;
 
 public record CreateReplyDto(
-    int UserId,
+    [Required, MinLength(1)] 
     string Body
 );

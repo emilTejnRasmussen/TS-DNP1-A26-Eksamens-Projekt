@@ -1,8 +1,9 @@
-﻿using Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using Entities;
 
 namespace DTO.CommentVote;
 
 public record CreateCommentVoteDto(
-    int UserId,
+    [Required]
     VoteType VoteType
 );
