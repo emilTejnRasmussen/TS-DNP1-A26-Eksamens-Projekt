@@ -1,0 +1,36 @@
+﻿.comment {
+    padding: 22px 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.comment-header {
+    margin-bottom: 12px;
+}
+
+.comment-header a {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.comment-header a:hover {
+    color: var(--coral);
+    text-decoration: underline;
+}
+
+.comment-body {
+    margin: 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .comment {
+        padding: 20px;
+    }
+}

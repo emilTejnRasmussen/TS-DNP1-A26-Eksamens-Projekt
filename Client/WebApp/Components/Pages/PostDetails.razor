@@ -1,6 +1,7 @@
 ﻿@page "/posts/{Id:int}"
 @using DTO.Posts
 @using DTO.PostVote
+@using WebApp.Components.Comments
 @using WebApp.Services.Interfaces
 @inject IPostService PostService
 
@@ -69,15 +70,7 @@
                 <div class="comments-list">
                     @foreach (var comment in post.Comments)
                     {
-                        <article class="comment" @key="comment.Id">
-                            <div class="comment-header">
-                                <a href="@($"/users/{comment.UserId}")">
-                                    u/@comment.UserId
-                                </a>
-                            </div>
-
-                            <p>@comment.Body</p>
-                        </article>
+                        <CommentCard @key="comment.Id" Comment="comment" />
                     }
                 </div>
             }

@@ -1,0 +1,16 @@
+﻿@using DTO.Comment
+
+<article class="comment">
+    <div class="comment-header">
+        <a href="@($"/users/{Comment.UserId}")">
+            u/@Comment.Username
+        </a>
+    </div>
+
+    <p class="comment-body">@Comment.Body</p>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public required CommentDto Comment { get; set; }
+}
