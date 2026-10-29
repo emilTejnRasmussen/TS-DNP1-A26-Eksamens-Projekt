@@ -1,0 +1,27 @@
+﻿<div class="vote-pill @(Compact ? "compact" : "")">
+    <button type="button"
+            disabled="@(Disabled || !OnUpvote.HasDelegate)"
+            aria-label="Upvote"
+            @onclick="OnUpvote">
+        <LucideIcon Name="arrow-big-up" Size="20" />
+    </button>
+
+    <span>@(Likes - Dislikes)</span>
+
+    <button type="button"
+            disabled="@(Disabled || !OnDownvote.HasDelegate)"
+            aria-label="Downvote"
+            @onclick="OnDownvote">
+        <LucideIcon Name="arrow-big-down" Size="20" />
+    </button>
+</div>
+
+@code {
+    [Parameter] public int Likes { get; set; }
+    [Parameter] public int Dislikes { get; set; }
+    [Parameter] public bool Compact { get; set; }
+
+    [Parameter] public EventCallback OnUpvote { get; set; }
+    [Parameter] public EventCallback OnDownvote { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+}

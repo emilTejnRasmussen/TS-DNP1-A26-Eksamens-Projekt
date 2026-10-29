@@ -1,5 +1,7 @@
 ﻿@using DTO.Posts
 @using DTO.PostVote
+@using Entities
+@using WebApp.Components.Voting
 @using WebApp.Services.Interfaces
 @inject IPostService PostService
 @inject NavigationManager Navigation
@@ -27,16 +29,16 @@
     </div>
 
     <div class="post-footer">
-        <div class="vote-pill" @onclick:stopPropagation="true">
-            <button type="button" disabled aria-label="Upvote">
-                <LucideIcon Name="arrow-big-up" Size="20"/>
-            </button>
-
-            <span>@(votes is null ? "–" : (votes.Likes - votes.Dislikes).ToString())</span>
-
-            <button type="button" disabled aria-label="Downvote">
-                <LucideIcon Name="arrow-big-down" Size="20"/>
-            </button>
+        <div @onclick:stopPropagation="true">
+            @if (votes is not null)
+            {
+                <VotePill
+                    Likes="@votes.Likes"
+                    Dislikes="@votes.Dislikes"
+                    Disabled="@isVoting"
+                    OnUpvote="() => VoteAsync(VoteType.Like)"
+                    OnDownvote="() => VoteAsync(VoteType.Dislike)" />
+            }
         </div>
 
         <a class="comment-pill"
@@ -64,5 +66,27 @@
     {
         votes = await PostService.GetVotesAsync(Post.Id);
     }
+    private bool isVoting;
 
+    private async Task VoteAsync(VoteType voteType)
+    {
+        if (isVoting)
+            return;
+
+        isVoting = true;
+
+        try
+        {
+            // TODO User logged in  user userid instead
+            var dto = new CreatePostVoteDto(1, voteType);
+
+            await PostService.AddVoteAsync(Post.Id, dto);
+
+            votes = await PostService.GetVotesAsync(Post.Id);
+        }
+        finally
+        {
+            isVoting = false;
+        }
+    }
 }

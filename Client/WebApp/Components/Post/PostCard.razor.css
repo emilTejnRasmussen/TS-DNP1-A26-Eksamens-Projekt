@@ -62,7 +62,6 @@
     border-top: 1px solid var(--border);
 }
 
-.vote-pill,
 .comment-pill {
     display: inline-flex;
     align-items: center;
@@ -73,26 +72,6 @@
     color: var(--text);
     font-size: 12px;
     font-weight: 650;
-}
-
-.vote-pill button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: default;
-}
-
-.vote-pill button:first-child {
-    color: var(--accent);
-}
-
-.vote-pill > span {
-    min-width: 18px;
-    text-align: center;
 }
 
 .comment-pill {
