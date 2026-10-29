@@ -5,12 +5,12 @@ namespace Mapper;
 
 public static class SubforumMapper
 {
-    public static Subforum ToEntity(CreateSubforumDto dto)
+    public static Subforum ToEntity(CreateSubforumDto dto, int creatorId)
     {
         var subforum = new Subforum(
             dto.Name,
             dto.Description,
-            dto.CreatorId,
+            creatorId,
             dto.Color,
             dto.Symbol
         );

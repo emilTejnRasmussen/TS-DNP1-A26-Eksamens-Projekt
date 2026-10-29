@@ -1,74 +1,60 @@
 ﻿using DTO.Subforum;
 using Mapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContract;
+using Services.Interfaces;
+using WebApi.Authentication;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("subforums")]
-public class SubforumController(
-    ISubforumRepository subforumRepo,
-    IPostRepository postRepo
-) : ControllerBase
+public class SubforumController(ISubforumService subforumService) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> AddSubforum([FromBody] CreateSubforumDto request)
     {
-        var createdSubforum = await subforumRepo.AddAsync(SubforumMapper.ToEntity(request));
-
-        return Created($"/subforums/{createdSubforum.Id}", SubforumMapper.ToDto(createdSubforum, 0));
+        var response = await subforumService.CreateSubforumAsync(User.GetUserId(), request);
+        
+        return Created($"/subforums/{response.Id}", response);
     }
 
+    [HttpGet("{subforumId:int}")]
+    public async Task<IActionResult> GetSubforumById([FromRoute] int subforumId)
+    {
+        var response = await subforumService.GetSingleAsync(subforumId);
+        
+        return Ok(response);
+    }
+    
     [HttpGet]
-    public async Task<IActionResult> GetAllSubforums([FromQuery] string? nameContains = null)
+    public async Task<IActionResult> GetAllSubforums(
+        [FromQuery] string? nameContains = null,
+        [FromQuery] int? creatorId = null)
     {
-        var subforums = subforumRepo.GetMany();
+        var response = await subforumService.GetManyAsync(nameContains, creatorId);
 
-        if (!string.IsNullOrWhiteSpace(nameContains))
-        {
-            subforums = subforums.Where(s => s.Name.Contains(nameContains, StringComparison.OrdinalIgnoreCase));
-        }
-
-        var dtos = new List<SubforumDto>();
-
-        foreach (var subforum in subforums)
-        {
-            var postCount = await postRepo.CountBySubforumIdAsync(subforum.Id);
-            dtos.Add(SubforumMapper.ToDto(subforum, postCount));
-        }
-
-        return Ok(dtos);
+        return Ok(response);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetSubforumById([FromRoute] int id)
-    {
-        var subforum = await subforumRepo.GetSingleAsync(id);
-        var postCount = await postRepo.CountBySubforumIdAsync(id);
-
-        return Ok(SubforumMapper.ToDto(subforum, postCount));
-    }
-
-    [HttpPatch("{id:int}")]
+    [Authorize]
+    [HttpPatch("{subforumId:int}")]
     public async Task<IActionResult> UpdateSubforum(
-        [FromRoute] int id,
+        [FromRoute] int subforumId,
         [FromBody] UpdateSubforumDto request)
     {
-        var subforumToUpdate = await subforumRepo.GetSingleAsync(id);
-
-        subforumToUpdate.Name = request.Name;
-        subforumToUpdate.Description = request.Description;
-
-        await subforumRepo.UpdateAsync(subforumToUpdate);
+        await subforumService.UpdateAsync(User.GetUserId(), subforumId, request);
 
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteSubforum([FromRoute] int id)
+    [Authorize]
+    [HttpDelete("{subforumId:int}")]
+    public async Task<IActionResult> DeleteSubforum([FromRoute] int subforumId)
     {
-        await subforumRepo.DeleteAsync(id);
+        await subforumService.DeleteAsync(User.GetUserId(), subforumId);
 
         return NoContent();
     }

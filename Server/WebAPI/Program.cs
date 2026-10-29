@@ -37,6 +37,7 @@ builder.Services.AddScoped<IPostVoteService, PostVoteService>();
 builder.Services.AddScoped<ICommentVoteService, CommentVoteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ISubforumService, SubforumService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
