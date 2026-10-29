@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
 using Entities;
 using FileRepositories;
@@ -80,6 +81,8 @@ builder.Services
             RequireExpirationTime = true,
             RequireSignedTokens = true,
 
+            NameClaimType = JwtRegisteredClaimNames.UniqueName,
+            
             ClockSkew = TimeSpan.Zero
         };
     });

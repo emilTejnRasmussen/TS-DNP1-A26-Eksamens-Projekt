@@ -1,4 +1,5 @@
 ﻿using DTO.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 
@@ -20,5 +21,16 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var response = await authService.LoginAsync(request);
         return Ok(response);
+    }
+    
+    [Authorize]
+    [HttpGet("test")]
+    public IActionResult TestAuth()
+    {
+        return Ok(new
+        {
+            message = "You are authenticated!",
+            username = User.Identity?.Name
+        });
     }
 }
